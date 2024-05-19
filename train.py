@@ -5,8 +5,8 @@ import warnings
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from model import BertNode2Vec, NegativeSamplingLoss
-from walker import BiasedRandomWalker
+from model.bertnode2vec import BertNode2Vec, NegativeSamplingLoss
+from utils.walker import BiasedRandomWalker
 
 
 class BertNode2VecTrainer:
@@ -73,7 +73,7 @@ class BertNode2VecTrainer:
 
         # Perform random walks starting from each node in `connected_nodes`
         trajectories = []
-        for node in tqdm(self.walker.connected_nodes): # canm be really slow
+        for node in tqdm(self.walker.connected_nodes):
             for _ in range(self.n_walks_per_node):
                 trajectory = self.walker.walk(node, walk_len)
                 trajectories.append(trajectory)
@@ -147,7 +147,7 @@ class BertNode2VecTrainer:
 
     def create_optimizer(self, lr: float):
         """Create an optimizer for training."""
-        return optim.SGD(self.model.parameters(), lr=lr)
+        return optim.Adam(self.model.parameters(), lr=lr)
 
     def train(self):
         """Train the model for `n_epochs` epochs."""
@@ -158,7 +158,7 @@ class BertNode2VecTrainer:
 
 
 if __name__ == "__main__":
-    from dataloader import arxiv_dataset
+    from dataset.dataloader import arxiv_dataset
     data = arxiv_dataset()
     walker = BiasedRandomWalker(data['graph'])
 

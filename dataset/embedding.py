@@ -32,7 +32,7 @@ def encode_single_scibert(abstract, tokenizer, model, emb_type="cls", device="cu
 if __name__ == "__main__":
     
     tokenizer, model = get_bert()
-    from dataloader import _load_titleabs
+    from dataset.dataloader import _load_titleabs
     titleabs = _load_titleabs()
     
     # CLS embeddings

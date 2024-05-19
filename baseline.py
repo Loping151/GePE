@@ -1,11 +1,11 @@
-from dataloader import arxiv_dataset, ClassifierDataset
-from model import Classifier
+from dataset.dataloader import arxiv_dataset, ClassifierDataset
+from model.common_utils import Classifier
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from model import evaluate
+from model.bertnode2vec import evaluate
 
 if __name__ == "__main__":
     device = 'cuda:0'

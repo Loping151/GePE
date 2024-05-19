@@ -15,17 +15,32 @@ class BiasedRandomWalker:
         self.io_q = q
         self.device = device
 
-        self.connected_nodes = self._get_connected_nodes()
+        # self.connected_nodes = self._get_connected_nodes()
         self.edge_index = self.data.edge_index
         self.num_nodes = self.data.num_nodes
-        self.sparse_adj = self._convert_to_sparse_matrix()
-
+        # self.sparse_adj = self._convert_to_sparse_matrix()
+        
+        self.adj_list = self._convert_to_adj_list()
+        self.connected_nodes = list(self.adj_list.keys())
+    
     def _convert_to_sparse_matrix(self):
         """Convert edge_index to a sparse adjacency matrix."""
         row, col = self.edge_index
         adj = torch.sparse_coo_tensor(torch.stack([row, col]), torch.ones_like(row), (self.num_nodes, self.num_nodes))
         return adj.to(self.device)
+    
+    def _convert_to_adj_list(self):
+        """Convert edge_index to an adjacency list."""
+        adj_list = {}
+        row, col = self.edge_index
 
+        for src, dst in zip(row.tolist(), col.tolist()):
+            if src not in adj_list:
+                adj_list[src] = []
+            adj_list[src].append(dst)
+
+        return adj_list
+    
     def _get_connected_nodes(self):
         """
         Returns a list of nodes that have at least one edge connected to them.
@@ -40,40 +55,78 @@ class BiasedRandomWalker:
         tot = sum(weights)
         return [p / tot for p in weights]
 
-    def get_probs_uniform(self, curr_node) -> Tuple[List[int], List[float]]:
+    # def get_probs_uniform(self, curr_node) -> Tuple[List[int], List[float]]:
+    #     """Returns a normalized uniform probability distribution
+    #     over the neighbors of the current node
+    #     """
+    #     indices = self.sparse_adj._indices()
+    #     # values = self.sparse_adj._values()
+    #     nexts = indices[1][indices[0] == curr_node].tolist()
+    #     probs = [1 / len(nexts)] * len(nexts)
+    #     return nexts, probs
+
+    # def get_probs_biased(self, curr_node, prev_node: int) -> Tuple[List[int], List[float]]:
+    #     """Returns a normalized biased probability distribution
+    #     over the neighbors of the current node
+    #     """
+        # indices = self.sparse_adj._indices()
+        # # values = self.sparse_adj._values()
+        # curr_nbrs = indices[1][indices[0] == curr_node]
+
+        # nexts = []
+        # unnormalized_probs = []
+        # for next in curr_nbrs:
+        #     nexts.append(next)
+
+        #     if next == prev_node:
+        #         unnormalized_probs.append(1 / self.ret_p)
+        #     elif next in indices[1][indices[0] == prev_node]:
+        #         unnormalized_probs.append(1)
+        #     else:
+        #         unnormalized_probs.append(1 / self.io_q)
+
+        # # normalize the probabilities
+        # probs = self._normalize(unnormalized_probs)
+        # return nexts, probs
+        
+    def get_probs_uniform(self, curr_node: int) -> Tuple[List[int], List[float]]:
         """Returns a normalized uniform probability distribution
-        over the neighbors of the current node
+        over the neighbors of the current node.
         """
-        indices = self.sparse_adj._indices()
-        # values = self.sparse_adj._values()
-        nexts = indices[1][indices[0] == curr_node].tolist()
+        nexts = self.adj_list.get(curr_node, [])
+        if not nexts:
+            return [], []
+
         probs = [1 / len(nexts)] * len(nexts)
         return nexts, probs
-
-    def get_probs_biased(self, curr_node, prev_node: int) -> Tuple[List[int], List[float]]:
+    
+    
+    def get_probs_biased(self, curr_node: int, prev_node: int) -> Tuple[List[int], List[float]]:
         """Returns a normalized biased probability distribution
-        over the neighbors of the current node
+        over the neighbors of the current node.
         """
-        indices = self.sparse_adj._indices()
-        # values = self.sparse_adj._values()
-        curr_nbrs = indices[1][indices[0] == curr_node]
+        curr_nbrs = self.adj_list.get(curr_node, [])
+        if not curr_nbrs:
+            return [], []
 
+        prev_nbrs = self.adj_list.get(prev_node, [])
         nexts = []
         unnormalized_probs = []
-        for next in curr_nbrs:
-            nexts.append(next)
 
-            if next == prev_node:
+        for next_node in curr_nbrs:
+            nexts.append(next_node)
+            if next_node == prev_node:
                 unnormalized_probs.append(1 / self.ret_p)
-            elif next in indices[1][indices[0] == prev_node]:
+            elif next_node in prev_nbrs:
                 unnormalized_probs.append(1)
             else:
                 unnormalized_probs.append(1 / self.io_q)
 
-        # normalize the probabilities
+        # Normalize the probabilities
         probs = self._normalize(unnormalized_probs)
         return nexts, probs
-
+    
+    
     def walk(self, start: int, length: int) -> List[int]:
         """Perform a random walk of length `length`, starting from node `start`.
 
@@ -100,6 +153,8 @@ class BiasedRandomWalker:
                 nexts, probs = self.get_probs_biased(curr_node, prev)
 
             if not nexts:
+                while len(trace) < length:
+                    trace.append(-1)
                 break  # If no neighbors, end the walk
 
             # `target` is to be sampled from neighboring nodes based on probabilities
@@ -113,7 +168,7 @@ class BiasedRandomWalker:
 
 
 if __name__ == "__main__":
-    from dataloader import arxiv_dataset
+    from dataset.dataloader import arxiv_dataset
     
     data = arxiv_dataset()
     walker = BiasedRandomWalker(data['graph'])
