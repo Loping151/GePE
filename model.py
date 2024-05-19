@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch
 
 
-class bert_node2vec(nn.Module):
+class BertNode2Vec(nn.Module):
     
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize.pth', device='cuda:0'):
         super().__init__()
@@ -32,15 +32,15 @@ class bert_node2vec(nn.Module):
         return outputs.pooler_output
 
 
-class classifier(nn.Module):
+class Classifier(nn.Module):
     def __init__(self, in_dim, num_cls):
-        super().__init__()
+        super(Classifier, self).__init__()
         self.fc = nn.Linear(in_dim, num_cls)
-        self.softmax = nn.Softmax()
+        # self.softmax = nn.Softmax(dim=1)
         
     def forward(self, x):
         x = self.fc(x)
-        x = self.softmax(x)
+        # x = self.softmax(x)
         return x
 
 
@@ -48,11 +48,60 @@ def evaluate(pred, label):
     input_dict = {"y_true": label, "y_pred": pred}
     return Evaluator(name='ogbn-arxiv').eval(input_dict)
 
+
+class NegativeSamplingLoss(nn.Module):
+    """The negative sampling loss function.
+
+    Args:
+        eps (float, optional): For numerical stability. Defaults to 1e-7.
+    """
+
+    def __init__(self, eps: float = 1e-7):
+        super().__init__()
+        self.eps = eps
+
+    def forward(
+        self,
+        cur_embs: torch.Tensor,
+        pos_embs: torch.Tensor,
+        neg_embs: torch.Tensor,
+    ):
+        """
+        Compute the negative sampling loss.
+
+        Args:
+            cur_embs (torch.Tensor): Embeddings of the current nodes, shape (B, H).
+            pos_embs (torch.Tensor): Embeddings of the positive samples, shape (B, N_pos, H).
+            neg_embs (torch.Tensor): Embeddings of the negative samples, shape (B, N_neg, H).
+
+        Returns:
+            torch.Tensor: The negative sampling loss.
+        """
+        # Reshape embeddings for broadcasting
+        B, H = cur_embs.shape
+        cur_embs = cur_embs.unsqueeze(1)  # shape (B, 1, H)
+        pos_embs = pos_embs.view(B, -1, H)  # shape (B, N_pos, H)
+        neg_embs = neg_embs.view(B, -1, H)  # shape (B, N_neg, H)
+
+        # Compute scores
+        pos_scores = torch.bmm(pos_embs, cur_embs.transpose(1, 2)).squeeze(2)  # shape (B, N_pos)
+        neg_scores = torch.bmm(neg_embs, cur_embs.transpose(1, 2)).squeeze(2)  # shape (B, N_neg)
+
+        # Compute positive and negative losses
+        pos_loss = -torch.log(torch.sigmoid(pos_scores) + self.eps).sum()
+        neg_loss = -torch.log(1 - torch.sigmoid(neg_scores) + self.eps).sum()
+
+        # Total loss
+        loss = pos_loss + neg_loss
+
+        return loss
+
+
 if __name__ == "__main__":
     from dataloader import _load_titleabs
     titleabs = _load_titleabs()
     
     abs_10 = titleabs['abs'][:].to_list()
-    model = bert_node2vec(abs_10, device='cuda:0')
+    model = BertNode2Vec(abs_10, device='cuda:0')
     output = model([0, 1, 2, 3, 4])
     print(output.shape)

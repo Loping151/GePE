@@ -4,13 +4,13 @@ import torch_geometric.transforms as T
 import numpy as np
 import pandas as pd
 import torch
+from torch.utils.data import Dataset, DataLoader
 
 
-def _arxiv_dataset(emb_path='./data/embeddings_cls.pth', device='cuda:0'):
-    dataset = PygNodePropPredDataset(name='ogbn-arxiv', root='./data', transform=T.ToSparseTensor(layout=torch.sparse_coo))
+def arxiv_dataset(transform=False):
+    dataset = PygNodePropPredDataset(name='ogbn-arxiv', root='./data', transform=T.ToSparseTensor(layout=torch.sparse_coo) if transform else None)
     split_idx = dataset.get_idx_split()
     graph = dataset[0]
-    graph['node_feat'] = _concat_features(graph, emb_path=emb_path, device=device)
     return {
         'train_idx': split_idx['train'], # 90941
         'valid_idx': split_idx['valid'], # 29799
@@ -40,7 +40,7 @@ def get_neighbour_loader(batch_size=4096, num_workers=12, device='cuda:0'):
     '''
     return train_loader, test_loader using NeighborLoader. note that I add valid data into train data
     '''
-    data = _arxiv_dataset(device=device)
+    data = arxiv_dataset()
     train_loader = NeighborLoader(
             data['graph'],
             input_nodes=np.concatenate([data['train_idx'], data['valid_idx']]),
@@ -59,7 +59,20 @@ def get_neighbour_loader(batch_size=4096, num_workers=12, device='cuda:0'):
         )
     return train_loader, test_loader
 
+
+class ClassifierDataset(Dataset):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+    
+
 if __name__ == '__main__':
-    data = _arxiv_dataset()
+    data = arxiv_dataset()
     titleabs = _load_titleabs()
     print(titleabs[:10])

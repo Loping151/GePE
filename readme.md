@@ -24,14 +24,19 @@ wget https://download.loping151.com/files/dm2024/data/pre_tokenize.pth
 # If you can't access ipv6, you will not be able to download the above 2 files.
 # Then you should run: python embeddings.py to generate them.
 cd ..
+
+
+# run code, only baseline2 is finished now:
+python baseline.py
 ```
 
 ### Experiments
-1. use the given 128 dim embedding to do classification (baseline1)
 
-2. use scibert to directly get embeddings for each paper and do classification without node2vec (baseline2)
+~~1. use the given 128 dim embedding to do classification (baseline1)~~
 
-3. use bert to train embeddings for each paper with node2vec and do classification
+2. use scibert to directly get embeddings for each paper and do classification without node2vec (baseline2): now reach 0.678
+
+3. use bert to train embeddings for each paper with node2vec and do classification: slow walker
 
 
 
@@ -48,10 +53,9 @@ Each paper comes with a 128-dimensional feature vector obtained by averaging the
 
 ### how to read the code
 
-**According to my coding habit, if a function starts with '_', you don't need to pay much attention to it.**
-- embedding.py: utils for embeddings.
+**If a function starts with '_', you don't need to pay much attention to it.**
 
-- dataloader.py: imports data and fuse embeddings(bert emb+year+original feat). 
+not finished. ask me.
 
 ### file organize
 
