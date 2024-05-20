@@ -6,7 +6,7 @@ import torch
 
 class BertNode2Vec(nn.Module):
     
-    def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize.pth', device='cuda:0'):
+    def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_bert.pth', device='cuda:0'):
         super().__init__()
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.bert = BertModel(BertConfig()).to(device)

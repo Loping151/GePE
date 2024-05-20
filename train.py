@@ -5,7 +5,8 @@ import warnings
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from model.bertnode2vec import BertNode2Vec, NegativeSamplingLoss
+from model.distilbert import DistilBertNode2Vec as Node2Vec
+from model.common_utils import NegativeSamplingLoss
 from utils.walker import BiasedRandomWalker
 
 
@@ -32,7 +33,7 @@ class BertNode2VecTrainer:
     def __init__(
         self,
         num_nodes: int,
-        model: BertNode2Vec,
+        model,
         walker: BiasedRandomWalker,
         n_negs: int,
         n_epochs: int,
@@ -73,7 +74,7 @@ class BertNode2VecTrainer:
 
         # Perform random walks starting from each node in `connected_nodes`
         trajectories = []
-        for node in tqdm(self.walker.connected_nodes):
+        for node in tqdm(self.walker.connected_nodes[:1000]):
             for _ in range(self.n_walks_per_node):
                 trajectory = self.walker.walk(node, walk_len)
                 trajectories.append(trajectory)
@@ -81,12 +82,10 @@ class BertNode2VecTrainer:
         # Convert the walks into training samples
         walks = []
         for trajectory in trajectories:
-            for center in range(len(trajectory)):
-                start = max(0, center - context_sz)
-                end = min(len(trajectory), center + context_sz + 1)
-                context = trajectory[start:center] + trajectory[center+1:end]
-                walks.append((trajectory[center], context))
-
+            for cent in range(context_sz, walk_len - context_sz):
+                walks.append(trajectory[cent - context_sz : cent + context_sz + 1])
+        walks = torch.LongTensor(walks)
+        
         return DataLoader(walks, batch_size=self.batch_size, shuffle=True)
 
     def _sample_neg_nodes(self, batch_sz: int, context_sz: int, n_negs: int):
@@ -111,15 +110,17 @@ class BertNode2VecTrainer:
         """
         tot_loss = 0
         prog = tqdm(self._get_random_walks())
+        context_sz = self.window_size // 2
         for bid, batch in enumerate(prog):
             self.optimizer.zero_grad()
 
-            batch = [(center, context) for center, context in batch]
-            currents = torch.LongTensor([center for center, _ in batch]).to(self.device)
-            contexts = torch.LongTensor([context for _, context in batch]).to(self.device)
+            batch = batch.to(self.device)
 
-            B = currents.shape[0]  # batch size
-            L = contexts.shape[1]  # context size
+            B = batch.shape[0]  # batch size
+            L = batch.shape[1] - 1  # context size
+            
+            currents = batch[:, context_sz]
+            contexts = torch.cat((batch[:, :context_sz], batch[:, context_sz+1:]), dim=1).contiguous()
 
             # Current node embeddings
             cur_embeddings = self.model(currents)  # (B, D)
@@ -162,7 +163,7 @@ if __name__ == "__main__":
     data = arxiv_dataset()
     walker = BiasedRandomWalker(data['graph'])
 
-    model = BertNode2Vec(device='cuda')
+    model = Node2Vec(device='cuda')
 
     trainer = BertNode2VecTrainer(
         num_nodes=data['graph'].num_nodes,
@@ -170,11 +171,11 @@ if __name__ == "__main__":
         walker=walker,
         n_negs=5,
         n_epochs=10,
-        batch_size=256,
+        batch_size=1,
         lr=0.01,
         device='cuda',
-        walk_length=15,
-        window_size=7,
+        walk_length=8,
+        window_size=5,
         n_walks_per_node=10
     )
 

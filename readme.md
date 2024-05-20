@@ -40,8 +40,6 @@ python baseline.py
 
 3. use bert to train embeddings for each paper with node2vec and do classification: slow walker
 
-
-
 ### Key info to confirm
 - The ogbn-arxiv dataset is a directed graph, each directed edge indicates that one paper cites another one.
 
@@ -52,6 +50,8 @@ Each paper comes with a 128-dimensional feature vector obtained by averaging the
 - The task is to predict the 40 subject areas of arXiv CS papers, e.g., cs.AI, cs.LG, and cs.OS.
 
 - Split: train: until 2017, validate: in 2018, and test: since 2019. For us, it doesn't matter since full label is given.
+
+- Benchmark: https://paperswithcode.com/sota/node-property-prediction-on-ogbn-arxiv
 
 ### how to read the code
 
