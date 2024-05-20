@@ -1,9 +1,9 @@
 import random
-from typing import List, Tuple
 from torch_geometric.utils import degree
 import torch
 import torch.sparse
-
+import numpy as np
+import networkx as nx
 
 
 class BiasedRandomWalker:
@@ -22,7 +22,8 @@ class BiasedRandomWalker:
         self.num_nodes = self.data.num_nodes
         
         self.adj_list, self.adj_list_inv = self._convert_to_adj_list()
-        self.connected_nodes = list(self.adj_list.keys()) # count only nodes with out edges to walk from
+        self.connected_nodes = list(set(self.adj_list.keys())) # count only nodes with out edges to walk from
+        print(f"Number of connected nodes: {len(self.connected_nodes)}")
     
     
     def _convert_to_sparse_matrix(self):
@@ -36,7 +37,7 @@ class BiasedRandomWalker:
         """Convert edge_index to an adjacency list."""
         adj_list = {}
         adj_list_inv = {}
-        row, col = self.edge_index
+        row, col = np.array(self.edge_index)
 
         for src, dst in zip(row, col):
             if src not in adj_list:
@@ -45,17 +46,27 @@ class BiasedRandomWalker:
             if dst not in adj_list_inv:
                 adj_list_inv[dst] = []
             adj_list_inv[dst].append(src)
-
+            
         return adj_list, adj_list_inv
 
 
+    def _convert_to_networkx(self):
+        """Convert edge_index to a networkx graph."""
+        G = nx.DiGraph()
+        row, col = self.edge_index
+        edges = zip(row.tolist(), col.tolist())
+        G.add_edges_from(edges)
+        return G
+    
+
     def _normalize(self, weights):
         """Normalizes the weights to make them sum to 1."""
-        tot = sum(weights)
-        return [p / tot for p in weights]
+        weights = np.array(weights)
+        tot = weights.sum()
+        return weights / tot
 
 
-    def get_probs_uniform(self, curr_node: int) -> Tuple[List[int], List[float]]:
+    def get_probs_uniform(self, curr_node: int):
         """Returns a normalized uniform probability distribution
         over the neighbors of the current node.
         """
@@ -67,7 +78,7 @@ class BiasedRandomWalker:
         return nexts, probs
     
     
-    def get_probs_biased(self, curr_node: int, prev_node: int) -> Tuple[List[int], List[float]]:
+    def get_probs_biased(self, curr_node: int, prev_node: int):
         """Returns a normalized biased probability distribution
         over the neighbors of the current node.
         """
@@ -103,7 +114,7 @@ class BiasedRandomWalker:
         return nexts, probs
     
     
-    def walk(self, start: int, length: int) -> List[int]:
+    def walk(self, start: int, length: int):
         """Perform a random walk of length `length`, starting from node `start`.
 
         Args:
@@ -128,11 +139,11 @@ class BiasedRandomWalker:
                 # For the subsequent nodes, sample based on the biased probabilities
                 nexts, probs = self.get_probs_biased(curr_node, prev)
 
-            if not nexts:
-                # padding. should not happen for undirected graphs
-                # while len(trace) < length:
-                    # trace.append(-1)
-                break  # If no neighbors, end the walk
+            # if not nexts:
+            #     # padding. should not happen for undirected graphs
+            #     # while len(trace) < length:
+            #         # trace.append(-1)
+            #     break  # If no neighbors, end the walk
 
             # `target` is to be sampled from neighboring nodes based on probabilities
             target = random.choices(nexts, probs)[0]

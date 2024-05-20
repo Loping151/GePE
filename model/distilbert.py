@@ -1,14 +1,15 @@
 from transformers import DistilBertConfig, DistilBertTokenizer, DistilBertModel
+from model.common_utils import Node2Vec
 import torch.nn as nn
 import torch
 
 
-class DistilBertNode2Vec(nn.Module):
+class DistilBertNode2Vec(Node2Vec):
     
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_distilbert.pth', device='cuda:0'):
         super().__init__()
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-        self.bert = DistilBertModel(DistilBertConfig()).to(device)
+        self.bert = DistilBertModel(DistilBertConfig(n_layers=3, n_heads=4)).to(device)
         if abstract is not None:
             self.abs_ids = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(device)
             torch.save(self.abs_ids, pre_tokenize)

@@ -1,10 +1,11 @@
 from ogb.nodeproppred import Evaluator
+from model.common_utils import Node2Vec
 from transformers import BertConfig, BertTokenizer, BertModel
 import torch.nn as nn
 import torch
 
 
-class BertNode2Vec(nn.Module):
+class BertNode2Vec(Node2Vec):
     
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_bert.pth', device='cuda:0'):
         super().__init__()

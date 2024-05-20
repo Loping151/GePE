@@ -74,7 +74,7 @@ class BertNode2VecTrainer:
 
         # Perform random walks starting from each node in `connected_nodes`
         trajectories = []
-        for node in tqdm(self.walker.connected_nodes[:1000]):
+        for node in tqdm(self.walker.connected_nodes[:]):
             for _ in range(self.n_walks_per_node):
                 trajectory = self.walker.walk(node, walk_len)
                 trajectories.append(trajectory)
@@ -169,10 +169,10 @@ if __name__ == "__main__":
         num_nodes=data['graph'].num_nodes,
         model=model,
         walker=walker,
-        n_negs=5,
-        n_epochs=10,
-        batch_size=1,
-        lr=0.01,
+        n_negs=3,
+        n_epochs=1,
+        batch_size=8,
+        lr=1/0.01,
         device='cuda',
         walk_length=8,
         window_size=5,
@@ -180,3 +180,4 @@ if __name__ == "__main__":
     )
 
     trainer.train()
+    model.save('model.pth')

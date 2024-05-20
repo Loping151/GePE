@@ -2,6 +2,26 @@ from ogb.nodeproppred import Evaluator
 from transformers import BertConfig, BertTokenizer, BertModel
 import torch.nn as nn
 import torch
+import torch.nn.functional as F
+
+
+
+class Node2Vec(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def save(self, path):
+        """Save the model parameters to the specified path."""
+        torch.save(self.state_dict(), path)
+        print(f"Model saved to {path}")
+
+    @classmethod
+    def load(cls, path, *args, **kwargs):
+        """Load the model parameters from the specified path."""
+        model = cls(*args, **kwargs)
+        model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        print(f"Model loaded from {path}")
+        return model
 
 
 class Classifier(nn.Module):
@@ -25,10 +45,10 @@ class NegativeSamplingLoss(nn.Module):
     """The negative sampling loss function.
 
     Args:
-        eps (float, optional): For numerical stability. Defaults to 1e-7.
+        eps (float, optional): For numerical stability. Defaults to 1e-9.
     """
 
-    def __init__(self, eps: float = 1e-7):
+    def __init__(self, eps: float = 1e-9):
         super().__init__()
         self.eps = eps
 
@@ -49,21 +69,32 @@ class NegativeSamplingLoss(nn.Module):
         Returns:
             torch.Tensor: The negative sampling loss.
         """
-        # Reshape embeddings for broadcasting
-        B, H = cur_embs.shape
-        cur_embs = cur_embs.unsqueeze(1)  # shape (B, 1, H)
-        pos_embs = pos_embs.view(B, -1, H)  # shape (B, N_pos, H)
-        neg_embs = neg_embs.view(B, -1, H)  # shape (B, N_neg, H)
+        cur_embs = F.normalize(cur_embs, p=2, dim=1)  # shape (B, H)
+        pos_embs = F.normalize(pos_embs, p=2, dim=2)  # shape (B, N_pos, H)
+        neg_embs = F.normalize(neg_embs, p=2, dim=2)  # shape (B, N_neg, H)
 
+        # Reshape embeddings for broadcasting
+        cur_embs = cur_embs.unsqueeze(1)  # shape (B, 1, H)
+        
         # Compute scores
         pos_scores = torch.bmm(pos_embs, cur_embs.transpose(1, 2)).squeeze(2)  # shape (B, N_pos)
         neg_scores = torch.bmm(neg_embs, cur_embs.transpose(1, 2)).squeeze(2)  # shape (B, N_neg)
 
         # Compute positive and negative losses
-        pos_loss = -torch.log(torch.sigmoid(pos_scores) + self.eps).sum()
-        neg_loss = -torch.log(1 - torch.sigmoid(neg_scores) + self.eps).sum()
+        pos_loss = -F.logsigmoid(pos_scores).mean()
+        neg_loss = -F.logsigmoid(-neg_scores).mean()
 
         # Total loss
         loss = pos_loss + neg_loss
 
         return loss
+
+# Example usage
+if __name__ == "__main__":
+    loss_fn = NegativeSamplingLoss()
+    cur_embs = torch.randn(8, 128)  # Example current node embeddings
+    pos_embs = torch.randn(8, 5, 128)  # Example positive samples
+    neg_embs = torch.randn(8, 20, 128)  # Example negative samples
+
+    loss = loss_fn(cur_embs, pos_embs, neg_embs)
+    print("Loss:", loss.item())
