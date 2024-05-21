@@ -29,7 +29,8 @@ cd ..
 
 
 # run code, only baseline2 is finished now:
-python baseline.py
+python train.py # --help or see args.py for args
+python validate.py # also in args.py 
 ```
 
 ### Experiments
