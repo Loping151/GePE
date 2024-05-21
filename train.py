@@ -37,7 +37,6 @@ class BertNode2VecTrainer:
 
     def __init__(
         self,
-        num_nodes: int,
         model,
         walker: BiasedRandomWalker,
         n_negs: int,
@@ -51,7 +50,6 @@ class BertNode2VecTrainer:
         n_walks_per_node: int = 1,
         sample_node_prob: float = 0.5
     ):
-        self.num_nodes = num_nodes
         self.model = model
         self.n_negs = n_negs
 
@@ -71,7 +69,7 @@ class BertNode2VecTrainer:
         self.optimizer = self.create_optimizer(lr)
         self.loss_func = NegativeSamplingLoss()
         
-        self.num_nodes = math.floor(self.num_nodes * self.sample_node_prob)
+        self.num_nodes = math.floor(len(self.walker.connected_nodes) * self.sample_node_prob)
         self.num_workers = num_workers
         
     def _get_random_walks(self):
@@ -174,7 +172,7 @@ class BertNode2VecTrainer:
             tot_loss += loss.item()
             avg_loss = tot_loss / (bid + 1)
 
-            prog.set_description(f"Epoch: {eid:2d}, Loss: {avg_loss:.4f}")
+            prog.set_description(f"Epoch: {eid:2d}, avg_loss: {avg_loss:.4f}, loss: {loss.item():.4f}")
 
         print(f"Epoch: {eid:2d}, Loss: {avg_loss:.4f}")
 
@@ -205,7 +203,6 @@ if __name__ == "__main__":
         model.load(args.pretrain)
 
     trainer = BertNode2VecTrainer(
-        num_nodes=data['graph'].num_nodes,
         model=model,
         walker=walker,
         n_negs=args.n_negs,

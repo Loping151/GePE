@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     with torch.no_grad():
         if args.model_type == 'scibert':
-            emb = torch.load('./data/embeddings_cls.pth')
+            emb = torch.load('./data/embeddings_cls.pth').cpu()
         
         elif args.model_type == 'randombert':
             model = DistilBertNode2Vec(device=device)
@@ -34,6 +34,10 @@ if __name__ == "__main__":
                 emb = model([ids]).cpu()
                 emb_list.append(emb)
             emb = torch.cat(emb_list, dim=0)
+            
+        elif args.model_type == 'random':
+            emb = torch.rand((data['graph'].num_nodes, 768))
+            
             
         elif args.model_type == 'distilbert':
             model = DistilBertNode2Vec(device=device)

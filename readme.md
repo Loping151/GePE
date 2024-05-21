@@ -40,6 +40,10 @@ python baseline.py
 
 3. use bert to train embeddings for each paper with node2vec and do classification: slow walker
 
+4. use a random initialized bert, no node2vec: now reach 0.203
+
+5. use random embedding: should be around 0.025. actually 0.107
+
 ### Key info to confirm
 - The ogbn-arxiv dataset is a directed graph, each directed edge indicates that one paper cites another one.
 

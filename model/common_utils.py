@@ -1,5 +1,4 @@
 from ogb.nodeproppred import Evaluator
-from transformers import BertConfig, BertTokenizer, BertModel
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
@@ -29,10 +28,11 @@ class Classifier(nn.Module):
         super(Classifier, self).__init__()
         self.fc = nn.Linear(in_dim, num_cls)
         # self.softmax = nn.Softmax(dim=1)
+        self.sigmoid = nn.Sigmoid()
         
     def forward(self, x):
         x = self.fc(x)
-        # x = self.softmax(x)
+        # x = self.sigmoid(x)
         return x
 
 
@@ -76,13 +76,13 @@ class NegativeSamplingLoss(nn.Module):
         # Reshape embeddings for broadcasting
         cur_embs = cur_embs.unsqueeze(1)  # shape (B, 1, H)
         
-        # Compute scores
+        # Compute scores. Actually cos_sim
         pos_scores = torch.bmm(pos_embs, cur_embs.transpose(1, 2)).squeeze(2)  # shape (B, N_pos)
         neg_scores = torch.bmm(neg_embs, cur_embs.transpose(1, 2)).squeeze(2)  # shape (B, N_neg)
 
         # Compute positive and negative losses
-        pos_loss = -F.logsigmoid(pos_scores).mean()
-        neg_loss = -F.logsigmoid(-neg_scores).mean()
+        pos_loss = (1-pos_scores).mean()
+        neg_loss = neg_scores.mean()
 
         # Total loss
         loss = pos_loss + neg_loss
