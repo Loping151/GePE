@@ -3,3 +3,4 @@ data/
 reference
 .vscode
 .tmp
+*.pth

@@ -191,26 +191,33 @@ class BertNode2VecTrainer:
 
 
 if __name__ == "__main__":
+    from utils.args import get_train_args
     from dataset.dataloader import arxiv_dataset
+    
     data = arxiv_dataset()
     walker = BiasedRandomWalker(data['graph'])
 
-    model = Node2Vec(device='cuda')
+    args = get_train_args()
+    
+    model = Node2Vec(device=args.device)
+
+    if args.pretrain is not None:
+        model.load(args.pretrain)
 
     trainer = BertNode2VecTrainer(
         num_nodes=data['graph'].num_nodes,
         model=model,
         walker=walker,
-        n_negs=3,
-        n_epochs=1,
-        batch_size=8,
-        lr=0.01,
-        device='cuda',
-        num_workers=23,
-        walk_length=8,
-        window_size=5,
-        n_walks_per_node=10,
-        sample_node_prob=0.1
+        n_negs=args.n_negs,
+        n_epochs=args.n_epochs,
+        batch_size=args.batch_size,
+        lr=args.lr,
+        device=args.device,
+        num_workers=args.num_workers,
+        walk_length=args.walk_length,
+        window_size=args.window_size,
+        n_walks_per_node=args.n_walks_per_node,
+        sample_node_prob=args.sample_node_prob
     )
 
     trainer.train()
