@@ -11,12 +11,11 @@ class BiasedRandomWalker:
     A biased random walker for generating random walks on a graph.
     """
 
-    def __init__(self, data, p: float = 1.2, q: float = 2.0, p_inv: float = 2.0, device='cuda:0'):
+    def __init__(self, data, p: float = 1.2, q: float = 2.0, p_inv: float = 2.0):
         self.data = data
         self.ret_p = p
         self.io_q = q
         self.inv_prob = p_inv
-        self.device = device
 
         self.edge_index = self.data.edge_index
         self.num_nodes = self.data.num_nodes
@@ -30,7 +29,7 @@ class BiasedRandomWalker:
         """Convert edge_index to a sparse adjacency matrix."""
         row, col = self.edge_index
         adj = torch.sparse_coo_tensor(torch.stack([row, col]), torch.ones_like(row), (self.num_nodes, self.num_nodes))
-        return adj.to(self.device)
+        return adj
     
     
     def _convert_to_adj_list(self):

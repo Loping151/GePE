@@ -10,12 +10,18 @@ from model.bert import evaluate
 if __name__ == "__main__":
     device = 'cuda:0'
     num_epochs = 1000
+    baseline_type = 'scibert'
     
     
     data = arxiv_dataset()
     label_train = data['graph'].y[np.concatenate([data['train_idx'], data['valid_idx']])].to(device)
     label_test = data['graph'].y[data['test_idx']]
-    emb = torch.load('./data/embeddings_cls.pth').to(device)
+    
+    if baseline_type == 'scibert':
+        emb = torch.load('./data/embeddings_cls.pth').to(device)
+    elif baseline_type == 'randombert':
+        
+    
     emb_train = emb[np.concatenate([data['train_idx'], data['valid_idx']])]
     emb_test = emb[data['test_idx']]
     

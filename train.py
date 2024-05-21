@@ -2,14 +2,19 @@ import torch
 import torch.optim as optim
 import warnings
 
+import random
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from model.distilbert import DistilBertNode2Vec as Node2Vec
 from model.common_utils import NegativeSamplingLoss
 from utils.walker import BiasedRandomWalker
+from utils.walker_parallel import parallel_run, get_walks_single
+import os, shutil
+import math
 
 
+            
 class BertNode2VecTrainer:
     """A trainer class for training the `BertNode2Vec` model.
 
@@ -40,9 +45,11 @@ class BertNode2VecTrainer:
         batch_size: int,
         lr: float,
         device: torch.device,
+        num_workers: int = 23,
         walk_length: int = 15,
         window_size: int = 7,
         n_walks_per_node: int = 1,
+        sample_node_prob: float = 0.5
     ):
         self.num_nodes = num_nodes
         self.model = model
@@ -51,6 +58,7 @@ class BertNode2VecTrainer:
         self.walker = walker
         self.walk_length = walk_length
         self.n_walks_per_node = n_walks_per_node
+        self.sample_node_prob = sample_node_prob
 
         if window_size % 2 == 0:
             warnings.warn("Window size should be odd. Adding 1 to window size.")
@@ -62,7 +70,10 @@ class BertNode2VecTrainer:
 
         self.optimizer = self.create_optimizer(lr)
         self.loss_func = NegativeSamplingLoss()
-
+        
+        self.num_nodes = math.floor(self.num_nodes * self.sample_node_prob)
+        self.num_workers = num_workers
+        
     def _get_random_walks(self):
         """
         Performs random walks using the `walker`,
@@ -74,7 +85,7 @@ class BertNode2VecTrainer:
 
         # Perform random walks starting from each node in `connected_nodes`
         trajectories = []
-        for node in tqdm(self.walker.connected_nodes[:]):
+        for node in tqdm(random.sample(self.walker.connected_nodes, self.num_nodes)):
             for _ in range(self.n_walks_per_node):
                 trajectory = self.walker.walk(node, walk_len)
                 trajectories.append(trajectory)
@@ -84,10 +95,31 @@ class BertNode2VecTrainer:
         for trajectory in trajectories:
             for cent in range(context_sz, walk_len - context_sz):
                 walks.append(trajectory[cent - context_sz : cent + context_sz + 1])
-        walks = torch.LongTensor(walks)
+        walks = torch.tensor(walks)
         
         return DataLoader(walks, batch_size=self.batch_size, shuffle=True)
 
+
+    def _get_random_walks_parallel(self):
+        total_nodes = self.num_nodes
+        batch_size = total_nodes // self.num_workers + 1
+        params = [(start, min(start + batch_size, total_nodes)) for start in range(0, total_nodes, batch_size)]
+        args = [self.walk_length, self.window_size // 2, self.n_walks_per_node, self.walker]
+        if os.path.exists('.tmp'):
+            shutil.rmtree('.tmp')
+        os.mkdir('.tmp')
+        
+        parallel_run(get_walks_single, params, args, num_workers=self.num_workers)
+        walks = []
+        for start, end in params:
+            walks.append(torch.load(f'.tmp/walks_{start}_{end}.pth'))
+        
+        walks = torch.cat(walks, dim=0).type(torch.long)
+        shutil.rmtree('.tmp')
+        
+        return DataLoader(walks, batch_size=self.batch_size, shuffle=True)
+    
+    
     def _sample_neg_nodes(self, batch_sz: int, context_sz: int, n_negs: int):
         """Returns a batch of negative samples, to be used for NegativeSamplingLoss.
 
@@ -109,7 +141,7 @@ class BertNode2VecTrainer:
         then train the model using these samples.
         """
         tot_loss = 0
-        prog = tqdm(self._get_random_walks())
+        prog = tqdm(self._get_random_walks()) if self.num_nodes < 10000 else tqdm(self._get_random_walks_parallel())
         context_sz = self.window_size // 2
         for bid, batch in enumerate(prog):
             self.optimizer.zero_grad()
@@ -172,11 +204,13 @@ if __name__ == "__main__":
         n_negs=3,
         n_epochs=1,
         batch_size=8,
-        lr=1/0.01,
+        lr=0.01,
         device='cuda',
+        num_workers=23,
         walk_length=8,
         window_size=5,
-        n_walks_per_node=10
+        n_walks_per_node=10,
+        sample_node_prob=0.1
     )
 
     trainer.train()

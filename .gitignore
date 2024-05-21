@@ -2,3 +2,4 @@ __pycache__/
 data/
 reference
 .vscode
+.tmp
