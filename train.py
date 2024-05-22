@@ -44,11 +44,11 @@ class BertNode2VecTrainer:
         batch_size: int,
         lr: float,
         device: torch.device,
-        num_workers: int = 23,
-        walk_length: int = 15,
-        window_size: int = 7,
-        n_walks_per_node: int = 1,
-        sample_node_prob: float = 0.5, 
+        num_workers: int = 12,
+        walk_length: int = 6,
+        window_size: int = 5,
+        n_walks_per_node: int = 3,
+        sample_node_prob: float = 0.02, 
         save_path: str = f'./checkpoint/{strftime("%Y%m%d%H%M%S")}'
     ):
         self.model = model
@@ -141,7 +141,7 @@ class BertNode2VecTrainer:
         then train the model using these samples.
         """
         tot_loss = 0
-        prog = tqdm(self._get_random_walks()) if self.num_nodes < 10000 else tqdm(self._get_random_walks_parallel())
+        prog = tqdm(self._get_random_walks()) if self.num_nodes < 1000*self.num_workers else tqdm(self._get_random_walks_parallel())
         context_sz = self.window_size // 2
         for bid, batch in enumerate(prog):
             self.optimizer.zero_grad()
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     model = Node2Vec(device=args.device)
 
     if args.pretrain is not None:
-        model.load(args.pretrain)
+        model = model.load(args.pretrain)
 
     trainer = BertNode2VecTrainer(
         model=model,

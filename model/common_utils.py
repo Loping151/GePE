@@ -18,7 +18,7 @@ class Node2Vec(nn.Module):
     def load(cls, path, *args, **kwargs):
         """Load the model parameters from the specified path."""
         model = cls(*args, **kwargs)
-        model.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load(path))
         print(f"Model loaded from {path}")
         return model
 

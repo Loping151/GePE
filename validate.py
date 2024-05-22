@@ -11,6 +11,7 @@ from tqdm import tqdm
 from utils.args import get_vaildate_args
 
 
+
 if __name__ == "__main__":
     args = get_vaildate_args()
     
@@ -21,9 +22,9 @@ if __name__ == "__main__":
     label_test = data['graph'].y[data['test_idx']]
     
     with torch.no_grad():
-        if args.model_type == 'scibert':
-            emb = torch.load('./data/embeddings_cls.pth').cpu()
-        
+        if args.model_type == 'random':
+            emb = torch.rand((data['graph'].num_nodes, 768))
+            
         elif args.model_type == 'randombert':
             model = DistilBertNode2Vec(device=device)
 
@@ -34,14 +35,12 @@ if __name__ == "__main__":
                 emb_list.append(emb)
             emb = torch.cat(emb_list, dim=0)
             
-        elif args.model_type == 'random':
-            emb = torch.rand((data['graph'].num_nodes, 768))
+        elif args.model_type == 'scibert':
+            emb = torch.load('./data/embeddings_cls.pth').cpu()
             
-            
-        elif args.model_type == 'distilbert':
+        elif args.model_type == 'bert':
             model = DistilBertNode2Vec(device=device)
-            model.load_state_dict(torch.load(args.pretrain))
-
+            model = model.load(args.pretrain)
             emb_list = []
             
             for ids in tqdm(range(0, data['graph'].num_nodes)):
