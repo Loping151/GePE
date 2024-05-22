@@ -14,7 +14,7 @@ class DistilBertNode2Vec(Node2Vec):
             self.abs_ids = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(device)
             torch.save(self.abs_ids, pre_tokenize)
         else:
-            self.abs_ids = torch.load(pre_tokenize).to(device)
+            self.abs_ids = torch.load(pre_tokenize, map_location=device)
             print("Load pre-tokenized data from", pre_tokenize)
         
     def get_ids_by_idx(self, idx):

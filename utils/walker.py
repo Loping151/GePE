@@ -21,7 +21,9 @@ class BiasedRandomWalker:
         self.num_nodes = self.data.num_nodes
         
         self.adj_list, self.adj_list_inv = self._convert_to_adj_list()
-        self.connected_nodes = list(set(self.adj_list.keys())) # count only nodes with out edges to walk from
+        # sel
+        # f.connected_nodes = list(set(self.adj_list.keys())) # count only nodes with out edges to walk from
+        self.connected_nodes = list(range(self.num_nodes)) # count only nodes with out edges to walk from
         print(f"Number of connected nodes: {len(self.connected_nodes)}")
     
     
@@ -69,7 +71,7 @@ class BiasedRandomWalker:
         """Returns a normalized uniform probability distribution
         over the neighbors of the current node.
         """
-        nexts = self.adj_list.get(curr_node, [])
+        nexts = self.adj_list.get(curr_node, []) + self.adj_list_inv.get(curr_node, [])
         if not nexts:
             return [], []
 

@@ -15,10 +15,10 @@ class Node2Vec(nn.Module):
         print(f"Model saved to {path}")
 
     @classmethod
-    def load(cls, path, *args, **kwargs):
+    def load(cls, path, device, *args, **kwargs):
         """Load the model parameters from the specified path."""
-        model = cls(*args, **kwargs)
-        model.load_state_dict(torch.load(path))
+        model = cls(device=device, *args, **kwargs)
+        model.load_state_dict(torch.load(path, map_location=device))
         print(f"Model loaded from {path}")
         return model
 
@@ -82,7 +82,7 @@ class NegativeSamplingLoss(nn.Module):
 
         # Compute positive and negative losses
         pos_loss = (1-pos_scores).mean()
-        neg_loss = neg_scores.mean()
+        neg_loss = (neg_scores).mean()
 
         # Total loss
         loss = pos_loss + neg_loss

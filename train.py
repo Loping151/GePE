@@ -6,7 +6,8 @@ import random
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from model.distilbert import DistilBertNode2Vec as Node2Vec
+from model.distilbert import DistilBertNode2Vec
+from model.embedding import Embedding
 from model.common_utils import NegativeSamplingLoss
 from utils.walker import BiasedRandomWalker
 from utils.walker_parallel import parallel_run, get_walks_single
@@ -70,7 +71,7 @@ class BertNode2VecTrainer:
         self.optimizer = self.create_optimizer(lr)
         self.loss_func = NegativeSamplingLoss()
         
-        self.num_nodes = math.floor(len(self.walker.connected_nodes) * self.sample_node_prob)
+        self.num_nodes = math.floor(self.walker.num_nodes * self.sample_node_prob)
         self.num_workers = num_workers
         self.save_path = save_path
         
@@ -101,7 +102,7 @@ class BertNode2VecTrainer:
 
 
     def _get_random_walks_parallel(self):
-        total_nodes = self.num_nodes
+        total_nodes = self.walker.num_nodes
         batch_size = total_nodes // self.num_workers + 1
         params = [(start, min(start + batch_size, total_nodes)) for start in range(0, total_nodes, batch_size)]
         args = [self.walk_length, self.window_size // 2, self.n_walks_per_node, self.walker]
@@ -132,7 +133,7 @@ class BertNode2VecTrainer:
         we might accidentally include positive edges during sampling.
         Since the graph is sparse, this should not cause much trouble.
         """
-        return torch.randint(self.num_nodes, (batch_sz, context_sz * n_negs))
+        return torch.randint(self.walker.num_nodes, (batch_sz, context_sz * n_negs))
 
     def _train_one_epoch(self, eid: int):
         """
@@ -202,10 +203,13 @@ if __name__ == "__main__":
 
     args = get_train_args()
     
-    model = Node2Vec(device=args.device)
+    if args.model_type == 'bert':
+        model = DistilBertNode2Vec(device=args.device)
+    elif args.model_type == 'embedding':
+        model = Embedding(data['graph'].num_nodes, 768, device=args.device)
 
     if args.pretrain is not None:
-        model = model.load(args.pretrain)
+        model = model.load(args.pretrain, args.device)
 
     trainer = BertNode2VecTrainer(
         model=model,

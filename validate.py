@@ -40,7 +40,7 @@ if __name__ == "__main__":
             
         elif args.model_type == 'bert':
             model = DistilBertNode2Vec(device=device)
-            model = model.load(args.pretrain)
+            model = model.load(args.pretrain, device)
             emb_list = []
             
             for ids in tqdm(range(0, data['graph'].num_nodes)):
