@@ -4,3 +4,4 @@ reference
 .vscode
 .tmp
 *.pth
+checkpoint

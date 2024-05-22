@@ -28,7 +28,7 @@ class Classifier(nn.Module):
         super(Classifier, self).__init__()
         self.fc = nn.Linear(in_dim, num_cls)
         # self.softmax = nn.Softmax(dim=1)
-        self.sigmoid = nn.Sigmoid()
+        # self.sigmoid = nn.Sigmoid()
         
     def forward(self, x):
         x = self.fc(x)

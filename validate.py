@@ -7,7 +7,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from model.common_utils import evaluate
 from model.distilbert import DistilBertNode2Vec
-from dataset.embedding import encode_single
 from tqdm import tqdm
 from utils.args import get_vaildate_args
 
@@ -77,7 +76,7 @@ if __name__ == "__main__":
             total_loss += loss.item()
 
         avg_loss = total_loss / len(train_loader)
-        print(f"Epoch [{epoch+1}/{args.num_epochs}], avg_loss: {avg_loss:.4f}, loss: {loss.item():.4f}")
+        print(f"Epoch [{epoch+1}/{args.num_epochs}], avg_loss: {avg_loss:.4f}")
 
     print("Training completed.")
     

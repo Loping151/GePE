@@ -12,7 +12,7 @@ from utils.walker import BiasedRandomWalker
 from utils.walker_parallel import parallel_run, get_walks_single
 import os, shutil
 import math
-
+from time import strftime
 
             
 class BertNode2VecTrainer:
@@ -48,7 +48,8 @@ class BertNode2VecTrainer:
         walk_length: int = 15,
         window_size: int = 7,
         n_walks_per_node: int = 1,
-        sample_node_prob: float = 0.5
+        sample_node_prob: float = 0.5, 
+        save_path: str = f'./checkpoint/{strftime("%Y%m%d%H%M%S")}'
     ):
         self.model = model
         self.n_negs = n_negs
@@ -71,6 +72,7 @@ class BertNode2VecTrainer:
         
         self.num_nodes = math.floor(len(self.walker.connected_nodes) * self.sample_node_prob)
         self.num_workers = num_workers
+        self.save_path = save_path
         
     def _get_random_walks(self):
         """
@@ -173,6 +175,9 @@ class BertNode2VecTrainer:
             avg_loss = tot_loss / (bid + 1)
 
             prog.set_description(f"Epoch: {eid:2d}, avg_loss: {avg_loss:.4f}, loss: {loss.item():.4f}")
+        self.model.save(f'{self.save_path}/model_{eid}.pth')
+        with open(f'{self.save_path}/loss.txt', 'a') as f:
+            f.write(f"{avg_loss}\n")
 
         print(f"Epoch: {eid:2d}, Loss: {avg_loss:.4f}")
 
@@ -214,8 +219,8 @@ if __name__ == "__main__":
         walk_length=args.walk_length,
         window_size=args.window_size,
         n_walks_per_node=args.n_walks_per_node,
-        sample_node_prob=args.sample_node_prob
+        sample_node_prob=args.sample_node_prob,
+        save_path=args.save_path
     )
 
     trainer.train()
-    model.save('model.pth')
