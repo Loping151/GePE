@@ -22,7 +22,7 @@ wget https://snap.stanford.edu/ogb/data/misc/ogbn_arxiv/titleabs.tsv.gz
 gunzip titleabs.tsv.gz
 wget https://download.loping151.com/files/dm2024/data/embeddings_cls.pth
 wget https://download.loping151.com/files/dm2024/data/embeddings_mean.pth
-wget https://download.loping151.com/files/dm2024/data/pre_tokenize.pth
+wget https://download.loping151.com/files/dm2024/data/pre_tokenize_distilbert.pth
 # If you can't access ipv6, you will not be able to download the above 2 files.
 # Then you should run: python embeddings.py to generate them.
 cd ..
