@@ -16,7 +16,7 @@ def get_train_args():
     parser.add_argument('--n_negs', type=int, default=5, help='Number of negative samples to be used in negative sampling.')
     parser.add_argument('--n_epochs', type=int, default=50, help='Number of epochs to train the model.')
     parser.add_argument('--batch_size', type=int, default=12, help='Batch size for training.')
-    parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate for training.')
+    parser.add_argument('--lr', type=float, default=3e-5, help='Learning rate for training.')
     parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run the training.')
     parser.add_argument('--num_workers', type=int, default=23, help='Number of workers for parallel processing.')
     parser.add_argument('--walk_length', type=int, default=6, help='Length of each random walk session.')

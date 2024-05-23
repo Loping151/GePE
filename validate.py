@@ -7,6 +7,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from model.common_utils import evaluate
 from model.distilbert import DistilBertNode2Vec
+from model.embedding import Embedding
 from tqdm import tqdm
 from utils.args import get_vaildate_args
 
@@ -35,12 +36,17 @@ if __name__ == "__main__":
                 emb_list.append(emb)
             emb = torch.cat(emb_list, dim=0)
             
+        elif args.model_type == 'embedding':
+            model = Embedding(num_node=data['graph'].num_nodes, embedding_dim=768, device='cpu') # don't cuda
+            model.load(args.pretrain, 'cpu')
+            emb = model.embedding.weight.detach()
+            
         elif args.model_type == 'scibert':
             emb = torch.load('./data/embeddings_cls.pth').cpu()
             
         elif args.model_type == 'bert':
             model = DistilBertNode2Vec(device=device)
-            model = model.load(args.pretrain, device)
+            model.load(args.pretrain, device)
             emb_list = []
             
             for ids in tqdm(range(0, data['graph'].num_nodes)):

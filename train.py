@@ -142,6 +142,7 @@ class BertNode2VecTrainer:
         then train the model using these samples.
         """
         tot_loss = 0
+        print("Walking...")
         prog = tqdm(self._get_random_walks()) if self.num_nodes < 1000*self.num_workers else tqdm(self._get_random_walks_parallel())
         context_sz = self.window_size // 2
         for bid, batch in enumerate(prog):
@@ -184,7 +185,7 @@ class BertNode2VecTrainer:
 
     def create_optimizer(self, lr: float):
         """Create an optimizer for training."""
-        return optim.Adam(self.model.parameters(), lr=lr)
+        return optim.AdamW(self.model.parameters(), lr=lr)
 
     def train(self):
         """Train the model for `n_epochs` epochs."""

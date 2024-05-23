@@ -45,6 +45,8 @@ python validate.py # also in args.py
 
 5. use random embedding: should be around 0.025. actually 0.107
 
+6. use a base embedding for word2vec, reach 0.598
+
 ### Key info to confirm
 - The ogbn-arxiv dataset is a directed graph, each directed edge indicates that one paper cites another one.
 

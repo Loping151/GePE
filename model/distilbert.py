@@ -9,7 +9,7 @@ class DistilBertNode2Vec(Node2Vec):
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_distilbert.pth', device='cuda:0'):
         super().__init__()
         self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-        self.bert = DistilBertModel(DistilBertConfig(n_layers=2, n_heads=3, hidden_dim=768)).to(device)
+        self.bert = DistilBertModel(DistilBertConfig(n_layers=1, n_heads=2, hidden_dim=768)).to(device)
         if abstract is not None:
             self.abs_ids = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(device)
             torch.save(self.abs_ids, pre_tokenize)
