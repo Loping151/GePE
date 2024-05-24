@@ -11,7 +11,7 @@ class BiasedRandomWalker:
     A biased random walker for generating random walks on a graph.
     """
 
-    def __init__(self, data, p: float = 1.2, q: float = 2.0, p_inv: float = 2.0):
+    def __init__(self, data, p: float = 3.0, q: float = 2.0, p_inv: float = 1.0):
         self.data = data
         self.ret_p = p
         self.io_q = q
