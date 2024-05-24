@@ -1,0 +1,5 @@
+python train.py
+
+
+python validate.py --model_type bert --pretrain ./checkpoint/20240523162141/model_49.pth --classifier knn
+python validate.py --model_type embedding --pretrain checkpoint/20240523004708/model_49.pth --classifier knn

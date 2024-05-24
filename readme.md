@@ -1,6 +1,6 @@
 # README
 
-## 别急
+## 急
 
 ### quick start
 
