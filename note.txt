@@ -1,4 +1,8 @@
-python train.py
+python train.py --model_type bert --lr 0.00003 --batch_size 24
+
+python train.py --model_type embedding --lr 0.001
+
+python train.py --model_type mlp --lr 0.01 --batch_size 2048
 
 
 python validate.py --model_type bert --pretrain ./checkpoint/20240523162141/model_49.pth --classifier knn

@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from model.common_utils import evaluate
 from model.distilbert import DistilBertNode2Vec
 from model.embedding import Embedding
+from model.hashmlp import MLP
 from tqdm import tqdm
 from utils.args import get_vaildate_args
 from sklearn.neighbors import KNeighborsClassifier
@@ -42,6 +43,16 @@ if __name__ == "__main__":
             model.load(args.pretrain, 'cpu')
             emb = model.embedding.weight.detach()
             
+        elif args.model_type == 'mlp':
+            model = MLP(in_dim=132, embedding_dim=768, hidden=16384, device=args.device)
+            model.load(args.pretrain, args.device)
+
+            emb_list = []
+            for ids in tqdm(range(0, data['graph'].num_nodes)):
+                emb = model([ids]).cpu()
+                emb_list.append(emb)
+            emb = torch.cat(emb_list, dim=0)
+                        
         elif args.model_type == 'scibert':
             emb = torch.load('./data/embeddings_cls.pth').cpu()
             
