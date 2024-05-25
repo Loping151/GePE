@@ -39,6 +39,9 @@ with torch.no_grad():
         
 F.normalize(emb, p=2, dim=1)
 
+knn = NearestNeighbors(n_neighbors=args.k, metric='cosine')
+knn.fit(emb.numpy())
+
 while True:
     try:
         abstract = title_to_abs()
@@ -54,8 +57,6 @@ while True:
         # inf_emb = encode_single(abstract, tokenizer, model)
         inf_emb = F.normalize(inf_emb, p=2, dim=1)
         
-        knn = NearestNeighbors(n_neighbors=args.k)
-        knn.fit(emb.numpy())
         distances, nearest_indices = knn.kneighbors(inf_emb.numpy(), return_distance=True)
 
         print(f"The indices of the {args.k} nearest nodes are: {nearest_indices[0]}")
