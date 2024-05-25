@@ -31,7 +31,7 @@ def encode_single(abstract, tokenizer, model, emb_type="cls", device="cuda:0"):
 
 if __name__ == "__main__":
     
-    tokenizer, model = get_sci_bert()
+    tokenizer, model = get_scibert()
     from dataset.dataloader import load_titleabs
     titleabs = load_titleabs()
     
