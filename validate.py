@@ -12,6 +12,7 @@ from model.hashmlp import MLP
 from tqdm import tqdm
 from utils.args import get_vaildate_args
 from sklearn.neighbors import KNeighborsClassifier
+import torch.nn.functional as F
 
 
 
@@ -66,6 +67,7 @@ if __name__ == "__main__":
                 emb_list.append(emb)
             emb = torch.cat(emb_list, dim=0)
     
+    emb = F.normalize(emb, p=2, dim=1)
     emb_train = emb[np.concatenate([data['train_idx'], data['valid_idx']])]
     emb_test = emb[data['test_idx']]
     
