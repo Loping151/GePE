@@ -7,3 +7,6 @@ python train.py --model_type mlp --lr 0.01 --batch_size 2048
 
 python validate.py --model_type bert --pretrain ./checkpoint/20240523162141/model_49.pth --classifier knn --k 100
 python validate.py --model_type embedding --pretrain checkpoint/20240523004708/model_49.pth --classifier knn
+
+PYTHONPATH=. python app/get_abstract.py
+PYTHONPATH=. python app/rs.py --pretrain ./checkpoint/20240523162141/model_49.pth

@@ -18,7 +18,7 @@ def arxiv_dataset(transform=False):
         'graph': graph
         }
 
-def _load_titleabs(path='./data/titleabs.tsv'):
+def load_titleabs(path='./data/titleabs.tsv'):
     data = pd.read_csv(path, sep='\t', header=None, names=['paper id', 'title', 'abs'])[1:-1] # Does't matter, the 0th row is not included in the graph
     nodeidx2paperid = pd.read_csv('./data/ogbn_arxiv/mapping/nodeidx2paperid.csv.gz', compression='gzip')
     data['paper id'] = data['paper id'].astype(int)
@@ -74,5 +74,5 @@ class ClassifierDataset(Dataset):
 
 if __name__ == '__main__':
     data = arxiv_dataset()
-    titleabs = _load_titleabs()
+    titleabs = load_titleabs()
     print(titleabs[:10])

@@ -3,7 +3,7 @@ import torch
 from tqdm import tqdm
 
 @torch.no_grad()
-def get_bert(device="cuda:0"):
+def get_scibert(device="cuda:0"):
 
     tokenizer = AutoTokenizer.from_pretrained("allenai/scibert_scivocab_uncased")
     model = AutoModel.from_pretrained("allenai/scibert_scivocab_uncased").to(device)
@@ -31,9 +31,9 @@ def encode_single(abstract, tokenizer, model, emb_type="cls", device="cuda:0"):
 
 if __name__ == "__main__":
     
-    tokenizer, model = get_bert()
-    from dataset.dataloader import _load_titleabs
-    titleabs = _load_titleabs()
+    tokenizer, model = get_sci_bert()
+    from dataset.dataloader import load_titleabs
+    titleabs = load_titleabs()
     
     # CLS embeddings
     emb_list = []

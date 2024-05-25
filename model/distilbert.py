@@ -21,9 +21,11 @@ class DistilBertNode2Vec(Node2Vec):
         idx_ids = {k:v[idx] for k, v in self.abs_ids.items()}
         return idx_ids
     
-    def tokenize_for_inference(self, abstract):
+    @torch.no_grad()
+    def inference(self, abstract):
         inputs = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(self.bert.device)
-        return inputs
+        outputs = self.bert(**inputs)
+        return outputs.last_hidden_state[:, 0]
 
     def forward(self, node_id):
         inputs = self.get_ids_by_idx(node_id)
@@ -34,8 +36,8 @@ class DistilBertNode2Vec(Node2Vec):
 
 
 if __name__ == "__main__":
-    from dataset.dataloader import _load_titleabs
-    titleabs = _load_titleabs()
+    from dataset.dataloader import load_titleabs
+    titleabs = load_titleabs()
     
     abst = titleabs['abs'][:].to_list()
     model = DistilBertNode2Vec(abst, device='cuda:0')

@@ -5,3 +5,4 @@ reference
 .tmp
 *.pth
 checkpoint
+.key

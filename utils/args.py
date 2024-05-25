@@ -45,7 +45,7 @@ def get_vaildate_args():
     parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs to train the classifier.')
     parser.add_argument('--batch_size', type=int, default=int(2**12), help='Batch size for training.')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate for training.')
-    parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run the training.')
+    parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run.')
     parser.add_argument('--num_workers', type=int, default=16, help='Number of workers for parallel processing.')
     
     # KNN classifier
@@ -55,6 +55,21 @@ def get_vaildate_args():
     parser.add_argument('--model_type', type=str, default='scibert', help='Type of model to validate.')
     parser.add_argument('--pretrain', type=str, default=None, help='Path to the pre-trained model.')
     
+    parser.add_argument('--seed', type=int, default=0, help='Random seed for reproducibility.')
+    
+    args = parser.parse_args()
+    seed_everything(args.seed)
+
+    return args
+
+
+def get_app_args():
+    parser = argparse.ArgumentParser(description='Validate model or baseline.')
+
+    parser.add_argument('--k', type=int, default=5, help='Number of neighbors to recommend in recommendation system.')
+    
+    parser.add_argument('--pretrain', type=str, default=None, help='Path to the pre-trained model.')
+    parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run.')
     parser.add_argument('--seed', type=int, default=0, help='Random seed for reproducibility.')
     
     args = parser.parse_args()

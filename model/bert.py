@@ -36,8 +36,8 @@ class BertNode2Vec(Node2Vec):
 
 
 if __name__ == "__main__":
-    from dataset.dataloader import _load_titleabs
-    titleabs = _load_titleabs()
+    from dataset.dataloader import load_titleabs
+    titleabs = load_titleabs()
     
     abs_10 = titleabs['abs'][:].to_list()
     model = BertNode2Vec(abs_10, device='cuda:0')
