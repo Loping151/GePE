@@ -40,7 +40,11 @@ with torch.no_grad():
 F.normalize(emb, p=2, dim=1)
 
 while True:
-    abstract = title_to_abs()
+    try:
+        abstract = title_to_abs()
+    except Exception as e:
+        print(e, 'Try again.')
+        continue
 
     if not abstract:
         exit(0)

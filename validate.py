@@ -9,6 +9,7 @@ from model.common_utils import evaluate
 from model.distilbert import DistilBertNode2Vec
 from model.embedding import Embedding
 from model.hashmlp import MLP
+from model.transformer import TransformerNode2Vec
 from tqdm import tqdm
 from utils.args import get_vaildate_args
 from sklearn.neighbors import KNeighborsClassifier
@@ -59,6 +60,16 @@ if __name__ == "__main__":
             
         elif args.model_type == 'bert':
             model = DistilBertNode2Vec(device=device)
+            model.load(args.pretrain, device)
+            emb_list = []
+            
+            for ids in tqdm(range(0, data['graph'].num_nodes)):
+                emb = model([ids]).cpu()
+                emb_list.append(emb)
+            emb = torch.cat(emb_list, dim=0)
+    
+        elif args.model_type == 'transformer':
+            model = TransformerNode2Vec(device=device)
             model.load(args.pretrain, device)
             emb_list = []
             

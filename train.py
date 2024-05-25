@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from model.distilbert import DistilBertNode2Vec
 from model.embedding import Embedding
 from model.hashmlp import MLP
+from model.transformer import TransformerNode2Vec
 from model.common_utils import NegativeSamplingLoss
 from utils.walker import BiasedRandomWalker
 from utils.walker_parallel import parallel_run, get_walks_single
@@ -207,6 +208,8 @@ if __name__ == "__main__":
     
     if args.model_type == 'bert':
         model = DistilBertNode2Vec(device=args.device)
+    if args.model_type == 'transformer':
+        model = TransformerNode2Vec(device=args.device)
     elif args.model_type == 'embedding':
         model = Embedding(data['graph'].num_nodes, 768, device=args.device)
     elif args.model_type == 'mlp':
