@@ -4,7 +4,7 @@ import torch_geometric.transforms as T
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import TensorDataset
 
 
 def arxiv_dataset(transform=False):
@@ -60,7 +60,7 @@ def get_neighbour_loader(batch_size=4096, num_workers=12, device='cuda:0'):
     return train_loader, test_loader
 
 
-class ClassifierDataset(Dataset):
+class ClassifierDataset(TensorDataset):
     def __init__(self, x, y):
         self.x = x
         self.y = y

@@ -1,9 +1,7 @@
 from model.common_utils import Node2Vec
 import torch.nn as nn
-import torch.nn.functional as F
 import torch
 import hashlib
-import numpy as np
 
 
 def encode_node_id(node_id):

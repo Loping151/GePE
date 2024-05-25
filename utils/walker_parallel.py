@@ -21,7 +21,7 @@ def parallel_run(func, iter_items, args, num_workers=24):
 def get_walks_single(start, end, walk_len, context_sz, n_walks_per_node, walker):
     # Perform random walks starting from each node in `connected_nodes`
     trajectories = []
-    for node in tqdm(walker.connected_nodes[start:end]):
+    for node in walker.connected_nodes[start:end]:
         for _ in range(n_walks_per_node):
             trajectory = walker.walk(node, walk_len)
             trajectories.append(trajectory)

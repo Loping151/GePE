@@ -6,7 +6,8 @@ import random
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from model.distilbert import DistilBertNode2Vec
+from model.bert import BertNode2Vec
+from model.scibert import SciBertNode2Vec
 from model.embedding import Embedding
 from model.hashmlp import MLP
 from model.transformer import TransformerNode2Vec
@@ -19,25 +20,6 @@ from time import strftime
 
             
 class BertNode2VecTrainer:
-    """A trainer class for training the `BertNode2Vec` model.
-
-    Args:
-    - `num_nodes` (int): Total number of nodes in the graph.
-    - `model` (Node2Vec): A `Node2Vec` model instance to be trained.
-    - `walker` (BiasedRandomWalker): A random walker.
-      This walker should implement:
-        1. a `walk(start, length)` method that returns a walk of length `length` starting from `start`.
-        2. a `connected_nodes` attribute that lists all nodes with at least one edge.
-    - `n_negs` (int): Number of negative samples to be used in negative sampling.
-    - `n_epochs` (int): Number of epochs to train the model.
-    - `batch_size` (int): Batch size for training.
-    - `lr` (float): Learning rate for training.
-    - `device` (torch.device): Device to run the training.
-    - `walk_length` (int): Length of each random walk session. Defaults to 15.
-    - `window_size` (int): Window size for each training sample Defaults to 7.
-    - `n_walks_per_node` (int): Number of walks to start from each node. Defaults to 1.
-    """
-
     def __init__(
         self,
         model,
@@ -78,11 +60,6 @@ class BertNode2VecTrainer:
         self.save_path = save_path
         
     def _get_random_walks(self):
-        """
-        Performs random walks using the `walker`,
-        converts the walks into training samples,
-        and returns a wrapped `DataLoader` for training.
-        """
         walk_len = self.walk_length
         context_sz = self.window_size // 2
 
@@ -124,25 +101,9 @@ class BertNode2VecTrainer:
     
     
     def _sample_neg_nodes(self, batch_sz: int, context_sz: int, n_negs: int):
-        """Returns a batch of negative samples, to be used for NegativeSamplingLoss.
-
-        Args:
-        - batch_sz (int): Batch size.
-        - context_sz (int): Context size.
-        - n_negs (int): Number of negative samples to be used.
-
-        NOTE: We simply randomly sample from all nodes and ignore the fact that
-        we might accidentally include positive edges during sampling.
-        Since the graph is sparse, this should not cause much trouble.
-        """
         return torch.randint(self.walker.num_nodes, (batch_sz, context_sz * n_negs))
 
     def _train_one_epoch(self, eid: int):
-        """
-        Perform one epoch of training.
-        We first perform random walks to generate training samples,
-        then train the model using these samples.
-        """
         tot_loss = 0
         print("Walking...")
         prog = tqdm(self._get_random_walks()) if self.num_nodes < 1000*self.num_workers else tqdm(self._get_random_walks_parallel())
@@ -179,22 +140,20 @@ class BertNode2VecTrainer:
             avg_loss = tot_loss / (bid + 1)
 
             prog.set_description(f"Epoch: {eid:2d}, avg_loss: {avg_loss:.4f}, loss: {loss.item():.4f}")
-        self.model.save(f'{self.save_path}/model_{eid}.pth')
         with open(f'{self.save_path}/loss.txt', 'a') as f:
             f.write(f"{avg_loss}\n")
 
         print(f"Epoch: {eid:2d}, Loss: {avg_loss:.4f}")
 
     def create_optimizer(self, lr: float):
-        """Create an optimizer for training."""
         return optim.AdamW(self.model.parameters(), lr=lr)
 
     def train(self):
-        """Train the model for `n_epochs` epochs."""
 
         self.model.train()
         for eid in range(self.n_epochs):
             self._train_one_epoch(eid)
+            self.model.save(f'{self.save_path}/model_{eid}.pth')
 
 
 if __name__ == "__main__":
@@ -207,7 +166,9 @@ if __name__ == "__main__":
     args = get_train_args()
     
     if args.model_type == 'bert':
-        model = DistilBertNode2Vec(device=args.device)
+        model = BertNode2Vec(device=args.device)
+    if args.model_type == 'pretrained_bert':
+        model = SciBertNode2Vec(device=args.device)
     if args.model_type == 'transformer':
         model = TransformerNode2Vec(device=args.device)
     elif args.model_type == 'embedding':

@@ -2,7 +2,7 @@ from ogb.nodeproppred import Evaluator
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-
+from tqdm import tqdm
 
 
 class Node2Vec(nn.Module):
@@ -20,6 +20,13 @@ class Node2Vec(nn.Module):
         print(f"Model loaded from {path}")
         return self
 
+    def embed_all(self, data):
+        emb_list = []
+        for ids in tqdm(range(0, data['graph'].num_nodes)):
+            emb = self.forward([ids]).cpu()
+            emb_list.append(emb)
+        emb = torch.cat(emb_list, dim=0)
+        return emb
 
 class Classifier(nn.Module):
     def __init__(self, in_dim, num_cls):

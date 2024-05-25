@@ -36,7 +36,7 @@ def main():
     if arxiv_url:
         abstract = get_arxiv_abstract(arxiv_url)
         if abstract:
-            print(f"Paper Title: {paper_title}\nURL: {arxiv_url}\nAbstract: \n{abstract}")
+            print(f"\nPaper Title: {paper_title}\nURL: {arxiv_url}\nAbstract: \n{abstract}")
         else:
             print("Abstract not found.")
     else:

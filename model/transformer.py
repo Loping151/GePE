@@ -1,8 +1,47 @@
-from transformers import AutoConfig, AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel
 from model.common_utils import Node2Vec
-import torch.nn as nn
 import torch
+import torch.nn as nn
+from torch.nn import TransformerEncoder, TransformerEncoderLayer
+import math
 
+
+class SimpleTransformer(nn.Module):
+    def __init__(self, input_dim, nhead, nhid, nlayers, dropout=0.5):
+        super(SimpleTransformer, self).__init__()
+        self.model_type = 'Transformer'
+        self.pos_encoder = PositionalEncoding(input_dim, dropout)
+        encoder_layers = TransformerEncoderLayer(input_dim, nhead, nhid, dropout)
+        self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
+        self.encoder = nn.Embedding(10000, input_dim)  # Assuming a vocab size of 10000
+        self.input_dim = input_dim
+        self.decoder = nn.Linear(input_dim, 2)  # Assuming binary classification
+
+    def forward(self, src):
+        src = self.encoder(src) * math.sqrt(self.input_dim)
+        src = self.pos_encoder(src)
+        output = self.transformer_encoder(src)
+        output = self.decoder(output[:,0,:])
+        return output
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, dropout=0.1, max_len=5000):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
+    
+# NOTE: Not finished yet
 class TransformerNode2Vec(Node2Vec):
     
     def __init__(self, model_name='bert-base-uncased', abstract=None, pre_tokenize='./data/pre_tokenize_transformer.pth', device='cuda:0'):

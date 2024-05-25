@@ -6,7 +6,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from model.common_utils import evaluate
-from model.distilbert import DistilBertNode2Vec
+from model.bert import BertNode2Vec
+from model.scibert import SciBertNode2Vec
 from model.embedding import Embedding
 from model.hashmlp import MLP
 from model.transformer import TransformerNode2Vec
@@ -31,14 +32,8 @@ if __name__ == "__main__":
             emb = torch.rand((data['graph'].num_nodes, 768))
             
         elif args.model_type == 'randombert':
-            model = DistilBertNode2Vec(device=device)
-
-            emb_list = []
-            
-            for ids in tqdm(range(0, data['graph'].num_nodes)):
-                emb = model([ids]).cpu()
-                emb_list.append(emb)
-            emb = torch.cat(emb_list, dim=0)
+            model = BertNode2Vec(device=device)
+            emb = model.embed_all(data)
             
         elif args.model_type == 'embedding':
             model = Embedding(num_node=data['graph'].num_nodes, embedding_dim=768, device='cpu') # don't cuda
@@ -48,37 +43,27 @@ if __name__ == "__main__":
         elif args.model_type == 'mlp':
             model = MLP(in_dim=132, embedding_dim=768, hidden=16384, device=args.device)
             model.load(args.pretrain, args.device)
-
-            emb_list = []
-            for ids in tqdm(range(0, data['graph'].num_nodes)):
-                emb = model([ids]).cpu()
-                emb_list.append(emb)
-            emb = torch.cat(emb_list, dim=0)
+            emb = model.embed_all(data)
                         
-        elif args.model_type == 'scibert':
+        elif args.model_type == 'scibert_direct':
             emb = torch.load('./data/embeddings_cls.pth').cpu()
             
-        elif args.model_type == 'bert':
-            model = DistilBertNode2Vec(device=device)
+        elif args.model_type == 'scibert':
+            model = SciBertNode2Vec(device=device)
             model.load(args.pretrain, device)
-            emb_list = []
-            
-            for ids in tqdm(range(0, data['graph'].num_nodes)):
-                emb = model([ids]).cpu()
-                emb_list.append(emb)
-            emb = torch.cat(emb_list, dim=0)
+            emb = model.embed_all(data)
+                
+        elif args.model_type == 'bert':
+            model = BertNode2Vec(device=device)
+            model.load(args.pretrain, device)
+            emb = model.embed_all(data)
     
         elif args.model_type == 'transformer':
             model = TransformerNode2Vec(device=device)
             model.load(args.pretrain, device)
-            emb_list = []
-            
-            for ids in tqdm(range(0, data['graph'].num_nodes)):
-                emb = model([ids]).cpu()
-                emb_list.append(emb)
-            emb = torch.cat(emb_list, dim=0)
+            emb = model.embed_all(data)
     
-    emb = F.normalize(emb, p=2, dim=1)
+    emb = F.normalize(emb, p=2, dim=1).to(device)
     emb_train = emb[np.concatenate([data['train_idx'], data['valid_idx']])]
     emb_test = emb[data['test_idx']]
     
@@ -113,6 +98,7 @@ if __name__ == "__main__":
     elif args.classifier == 'knn':
         
         classifier = KNeighborsClassifier(n_neighbors=args.k)
+        # classifier = KNeighborsClassifier(n_neighbors=args.k, metric='cosine')
         classifier.fit(emb_train, label_train.reshape(-1))
         
 

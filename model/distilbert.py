@@ -25,13 +25,15 @@ class DistilBertNode2Vec(Node2Vec):
     def inference(self, abstract):
         inputs = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(self.bert.device)
         outputs = self.bert(**inputs)
-        return outputs.last_hidden_state[:, 0]
+        return outputs.pooler_output
 
     def forward(self, node_id):
+        if type(node_id) == torch.Tensor:
+            node_id = node_id.cpu().numpy()
         inputs = self.get_ids_by_idx(node_id)
         outputs = self.bert(**inputs)
 
-        return outputs.last_hidden_state[:, 0]  # Use the first token (CLS token) as the pooled output
+        return outputs.pooler_output  # Use the first token (CLS token) as the pooled output
 
 
 

@@ -14,11 +14,11 @@ def get_train_args():
     # Trainer arguments
     parser.add_argument('--model_type', type=str, default='bert', help='Path to the pre-trained model.')
     parser.add_argument('--n_negs', type=int, default=5, help='Number of negative samples to be used in negative sampling.')
-    parser.add_argument('--n_epochs', type=int, default=50, help='Number of epochs to train the model.')
+    parser.add_argument('--n_epochs', type=int, default=100, help='Number of epochs to train the model.')
     parser.add_argument('--batch_size', type=int, default=20, help='Batch size for training.')
     parser.add_argument('--lr', type=float, default=1e-5, help='Learning rate for training.')
     parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run the training.')
-    parser.add_argument('--num_workers', type=int, default=23, help='Number of workers for parallel processing.')
+    parser.add_argument('--num_workers', type=int, default=20, help='Number of workers for parallel processing.')
     parser.add_argument('--walk_length', type=int, default=6, help='Length of each random walk session.')
     parser.add_argument('--window_size', type=int, default=5, help='Window size for each training sample.')
     parser.add_argument('--n_walks_per_node', type=int, default=3, help='Number of walks to start from each node.')
@@ -43,13 +43,13 @@ def get_vaildate_args():
     
     # MLP classifier
     parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs to train the classifier.')
-    parser.add_argument('--batch_size', type=int, default=int(2**12), help='Batch size for training.')
+    parser.add_argument('--batch_size', type=int, default=int(2**8), help='Batch size for training.')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate for training.')
     parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run.')
-    parser.add_argument('--num_workers', type=int, default=16, help='Number of workers for parallel processing.')
+    parser.add_argument('--num_workers', type=int, default=24, help='Number of workers for parallel processing.')
     
     # KNN classifier
-    parser.add_argument('--k', type=int, default=10, help='Number of neighbors to consider in KNN.')
+    parser.add_argument('--k', type=int, default=100, help='Number of neighbors to consider in KNN.')
     
     # validate options
     parser.add_argument('--model_type', type=str, default='scibert', help='Type of model to validate.')
@@ -68,6 +68,7 @@ def get_app_args():
 
     parser.add_argument('--k', type=int, default=5, help='Number of neighbors to recommend in recommendation system.')
     
+    parser.add_argument('--model_type', type=str, default='scibert', help='Type of model to validate.')
     parser.add_argument('--pretrain', type=str, default=None, help='Path to the pre-trained model.')
     parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run.')
     parser.add_argument('--seed', type=int, default=0, help='Random seed for reproducibility.')

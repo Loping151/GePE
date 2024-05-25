@@ -10,7 +10,7 @@ class BertNode2Vec(Node2Vec):
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_bert.pth', device='cuda:0'):
         super().__init__()
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        self.bert = BertModel(BertConfig()).to(device)
+        self.bert = BertModel(BertConfig(num_hidden_layers=1, num_attention_heads=3, intermediate_size=768)).to(device)
         if abstract is not None:
             self.abs_ids = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(device)
             torch.save(self.abs_ids, pre_tokenize)
@@ -22,12 +22,14 @@ class BertNode2Vec(Node2Vec):
         idx_ids = {k:v[idx] for k, v in self.abs_ids.items()}
         return idx_ids
     
-    def tokenize_for_inference(self, abstract):
+    @torch.no_grad()
+    def inference(self, abstract):
         inputs = self.tokenizer(abstract, return_tensors="pt", truncation=True, padding=True, max_length=512).to(self.bert.device)
-        return inputs
+        outputs = self.bert(**inputs)
+        return outputs.pooler_output
 
     def forward(self, node_id):
-        inputs = self.get_ids_by_idx(node_id)
+        inputs = self.get_ids_by_idx(node_id.cpu().numpy())
         outputs = self.bert(**inputs)
 
         return outputs.pooler_output

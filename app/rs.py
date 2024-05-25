@@ -7,7 +7,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from model.common_utils import evaluate
-from model.distilbert import DistilBertNode2Vec
+from model.bert import BertNode2Vec
+from model.scibert import SciBertNode2Vec
 from model.embedding import Embedding
 from model.hashmlp import MLP
 from tqdm import tqdm
@@ -28,14 +29,14 @@ titleabs = load_titleabs()
 with torch.no_grad():
     # emb = torch.load('./data/embeddings_cls.pth').cpu()
 
-    model = DistilBertNode2Vec(device=device)
-    model.load(args.pretrain, device)
-    emb_list = []
-    
-    for ids in tqdm(range(0, data['graph'].num_nodes)):
-        emb = model([ids]).cpu()
-        emb_list.append(emb)
-    emb = torch.cat(emb_list, dim=0)
+    if args.model_type == 'bert':
+        model = BertNode2Vec(device=device)
+        model.load(args.pretrain, device)
+        emb = model.embed_all(data)
+    elif args.model_type == 'scibert':
+        model = SciBertNode2Vec(device=device)
+        model.load(args.pretrain, device)
+        emb = model.embed_all(data)
         
 F.normalize(emb, p=2, dim=1)
 
@@ -46,15 +47,15 @@ while True:
     try:
         abstract = title_to_abs()
     except Exception as e:
-        print(e, 'Try again.')
+        print(e, '\nTry again.')
         continue
 
     if not abstract:
-        exit(0)
+        continue
     else:
         inf_emb = model.inference(abstract).cpu()
         # tokenizer, model = get_scibert()
-        # inf_emb = encode_single(abstract, tokenizer, model)
+        # inf_emb = encode_single(abstract, tokenizer, model).cpu()
         inf_emb = F.normalize(inf_emb, p=2, dim=1)
         
         distances, nearest_indices = knn.kneighbors(inf_emb.numpy(), return_distance=True)
