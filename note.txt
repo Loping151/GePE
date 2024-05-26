@@ -16,7 +16,10 @@ checkpoint/20240525180257/model_18.pth
 
 python train.py --model_type bert --batch_size 24
 python train.py --model_type pretrained_bert --batch_size 2048 --sample_node_prob 1
+python train.py --model_type embedding --batch_size 2048 --sample_node_prob 1
 
 python validate.py --model_type scibert --pretrain checkpoint/20240525214235/model_4.pth
 
 PYTHONPATH=. python app/rs.py --model_type scibert --pretrain ./checkpoint/20240525214235/model_17.pth
+python validate.py --model_type scibert --pretrain checkpoint/20240525221515/model_61.pth --classifier knn
+python validate.py --model_type bert --pretrain checkpoint/20240526000959/model_37.pth --classifier mlp

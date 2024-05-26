@@ -29,14 +29,17 @@ class Node2Vec(nn.Module):
         return emb
 
 class Classifier(nn.Module):
-    def __init__(self, in_dim, num_cls):
+    def __init__(self, in_dim, num_cls, hidden_dim=1024):
         super(Classifier, self).__init__()
-        self.fc = nn.Linear(in_dim, num_cls)
+        self.fc1 = nn.Linear(in_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, num_cls)
         # self.softmax = nn.Softmax(dim=1)
         # self.sigmoid = nn.Sigmoid()
         
     def forward(self, x):
-        x = self.fc(x)
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
         # x = self.sigmoid(x)
         return x
 

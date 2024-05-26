@@ -29,7 +29,9 @@ class BertNode2Vec(Node2Vec):
         return outputs.pooler_output
 
     def forward(self, node_id):
-        inputs = self.get_ids_by_idx(node_id.cpu().numpy())
+        if type(node_id) == torch.Tensor:
+            node_id = node_id.cpu().numpy()
+        inputs = self.get_ids_by_idx(node_id)
         outputs = self.bert(**inputs)
 
         return outputs.pooler_output

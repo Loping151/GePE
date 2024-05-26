@@ -48,7 +48,7 @@ if __name__ == "__main__":
         elif args.model_type == 'scibert_direct':
             emb = torch.load('./data/embeddings_cls.pth').cpu()
             
-        elif args.model_type == 'scibert':
+        elif args.model_type == 'pretrained_bert':
             model = SciBertNode2Vec(device=device)
             model.load(args.pretrain, device)
             emb = model.embed_all(data)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
             model.load(args.pretrain, device)
             emb = model.embed_all(data)
     
-    emb = F.normalize(emb, p=2, dim=1).to(device)
+    emb = F.normalize(emb, p=2, dim=1)
     emb_train = emb[np.concatenate([data['train_idx'], data['valid_idx']])]
     emb_test = emb[data['test_idx']]
     
@@ -73,8 +73,8 @@ if __name__ == "__main__":
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.AdamW(classifier.parameters(), lr=args.lr)
         
-        train_loader = DataLoader(ClassifierDataset(emb_train, label_train), batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
-        test_loader = DataLoader(ClassifierDataset(emb_test, label_test), batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+        train_loader = DataLoader(ClassifierDataset(emb_train, label_train), batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True, pin_memory_device=device)
+        test_loader = DataLoader(ClassifierDataset(emb_test, label_test), batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, pin_memory=True, pin_memory_device=device)
         
         
         for epoch in range(args.num_epochs):

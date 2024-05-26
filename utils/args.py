@@ -39,11 +39,11 @@ def get_vaildate_args():
     parser = argparse.ArgumentParser(description='Validate model or baseline.')
 
     # classifier train
-    parser.add_argument('--classifier', type=str, default='knn', help=' Type of the classifier.')
+    parser.add_argument('--classifier', type=str, default='mlp', help=' Type of the classifier.')
     
     # MLP classifier
     parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs to train the classifier.')
-    parser.add_argument('--batch_size', type=int, default=int(2**8), help='Batch size for training.')
+    parser.add_argument('--batch_size', type=int, default=int(2**10), help='Batch size for training.')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate for training.')
     parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run.')
     parser.add_argument('--num_workers', type=int, default=24, help='Number of workers for parallel processing.')

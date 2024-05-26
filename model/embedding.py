@@ -21,8 +21,6 @@ class Embedding(Node2Vec):
             self.embedding.weight.requires_grad = True
 
     def forward(self, x):
-        if type(node_id) == torch.Tensor:
-            node_id = node_id.cpu().numpy()
         x = self.embedding(x)
         return x
 
