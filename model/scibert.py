@@ -26,9 +26,9 @@ class SciBertNode2Vec(Node2Vec):
             print("Load pre-tokenized data from", pre_tokenize)
             print("Load pre-embedded data from", pre_embedding)
         self.out_trans = nn.Sequential(
-            nn.Linear(768, 2048),
+            nn.Linear(768, 4096),
             nn.ReLU(),
-            nn.Linear(2048, 768)
+            nn.Linear(4096, 768)
         ).to(device)
         
         

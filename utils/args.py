@@ -69,7 +69,7 @@ def get_app_args():
     parser.add_argument('--k', type=int, default=5, help='Number of neighbors to recommend in recommendation system.')
     
     parser.add_argument('--model_type', type=str, default='scibert', help='Type of model to validate.')
-    parser.add_argument('--pretrain', type=str, default=None, help='Path to the pre-trained model.')
+    parser.add_argument('--pretrain', type=str, default='./checkpoint/test.pth', help='Path to the pre-trained model.')
     parser.add_argument('--device', type=str, default='cuda', choices=['cpu', 'cuda'], help='Device to run.')
     parser.add_argument('--seed', type=int, default=0, help='Random seed for reproducibility.')
     

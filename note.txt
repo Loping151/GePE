@@ -23,3 +23,9 @@ python validate.py --model_type scibert --pretrain checkpoint/20240525214235/mod
 PYTHONPATH=. python app/rs.py --model_type scibert --pretrain ./checkpoint/20240525214235/model_17.pth
 python validate.py --model_type scibert --pretrain checkpoint/20240525221515/model_61.pth --classifier knn
 python validate.py --model_type bert --pretrain checkpoint/20240526000959/model_37.pth --classifier mlp
+
+python train.py --model_type pretrained_bert --batch_size 16384 --sample_node_prob 1 --n_epochs 10
+python validate.py --model_type pretrained_bert --pretrain checkpoint/20240527101905/model_35.pth --classifier mlp
+
+export no_proxy="localhost,127.0.0.1"
+PYTHONPATH=. python app/rs_gradio.py --model_type scibert

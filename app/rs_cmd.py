@@ -1,17 +1,7 @@
 from dataset.dataloader import arxiv_dataset, load_titleabs
-from dataset.embedding import get_scibert, encode_single
-from model.common_utils import Classifier
-import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from model.common_utils import evaluate
 from model.bert import BertNode2Vec
 from model.scibert import SciBertNode2Vec
-from model.embedding import Embedding
-from model.hashmlp import MLP
-from tqdm import tqdm
 from utils.args import get_app_args 
 import torch.nn.functional as F
 from app.get_abstract import title_to_abs
@@ -45,7 +35,7 @@ knn.fit(emb.numpy())
 
 while True:
     try:
-        abstract = title_to_abs()
+        abstract = title_to_abs(input("Enter the article title: "))
     except Exception as e:
         print(e, '\nTry again.')
         continue

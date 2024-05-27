@@ -29,8 +29,9 @@ def get_arxiv_abstract(arxiv_url):
         return abstract.text.replace('Abstract: ', '').strip()
     return None
 
-def main():
-    title = input("Enter the article title: ")
+def main(title=None):
+    if title is None:
+        title = input("Enter the article title: ")
     search_results = search_bing(title+' arxiv')
     arxiv_url, paper_title = find_arxiv_link(search_results)
     if arxiv_url:
@@ -43,8 +44,8 @@ def main():
         print("arXiv link not found.")
     return abstract if arxiv_url else None
     
-def title_to_abs():
-    return main()
+def title_to_abs(title=None):
+    return main(title)
 
 if __name__ == "__main__":
     main()
