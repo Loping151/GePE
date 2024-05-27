@@ -26,10 +26,10 @@ def get_arxiv_abstract(arxiv_url):
     soup = BeautifulSoup(response.content, 'html.parser')
     abstract = soup.find('blockquote', class_='abstract')
     if abstract:
-        return abstract.text.replace('Abstract: ', '').strip()
+        return abstract.text.replace('Abstract:', '').strip()
     return None
 
-def main(title=None):
+def title_to_abs(title=None):
     if title is None:
         title = input("Enter the article title: ")
     search_results = search_bing(title+' arxiv')
@@ -42,10 +42,8 @@ def main(title=None):
             print("Abstract not found.")
     else:
         print("arXiv link not found.")
-    return abstract if arxiv_url else None
+    return (paper_title, abstract) if arxiv_url else (None, None)
     
-def title_to_abs(title=None):
-    return main(title)
 
 if __name__ == "__main__":
-    main()
+    title_to_abs()

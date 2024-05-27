@@ -18,7 +18,6 @@ titleabs = load_titleabs()
 
 with torch.no_grad():
     # emb = torch.load('./data/embeddings_cls.pth').cpu()
-
     if args.model_type == 'bert':
         model = BertNode2Vec(device=device)
         model.load(args.pretrain, device)
@@ -35,7 +34,7 @@ knn.fit(emb.numpy())
 
 while True:
     try:
-        abstract = title_to_abs(input("Enter the article title: "))
+        title, abstract = title_to_abs(input("Enter the article title: "))
     except Exception as e:
         print(e, '\nTry again.')
         continue

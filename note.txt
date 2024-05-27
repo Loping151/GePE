@@ -5,8 +5,8 @@ python train.py --model_type embedding --lr 0.001
 python train.py --model_type mlp --lr 0.01 --batch_size 2048
 
 
-python validate.py --model_type bert --pretrain ./checkpoint/20240523162141/model_49.pth --classifier knn --k 100
-python validate.py --model_type embedding --pretrain checkpoint/20240523004708/model_49.pth --classifier knn
+python validate_cls.py --model_type bert --pretrain ./checkpoint/20240523162141/model_49.pth --classifier knn --k 100
+python validate_cls.py --model_type embedding --pretrain checkpoint/20240523004708/model_49.pth --classifier knn
 
 PYTHONPATH=. python app/get_abstract.py
 PYTHONPATH=. python app/rs.py --pretrain ./checkpoint/20240523162141/model_49.pth
@@ -18,14 +18,17 @@ python train.py --model_type bert --batch_size 24
 python train.py --model_type pretrained_bert --batch_size 2048 --sample_node_prob 1
 python train.py --model_type embedding --batch_size 2048 --sample_node_prob 1
 
-python validate.py --model_type scibert --pretrain checkpoint/20240525214235/model_4.pth
+python validate_cls.py --model_type scibert --pretrain checkpoint/20240525214235/model_4.pth
 
 PYTHONPATH=. python app/rs.py --model_type scibert --pretrain ./checkpoint/20240525214235/model_17.pth
-python validate.py --model_type scibert --pretrain checkpoint/20240525221515/model_61.pth --classifier knn
-python validate.py --model_type bert --pretrain checkpoint/20240526000959/model_37.pth --classifier mlp
+python validate_cls.py --model_type scibert --pretrain checkpoint/20240525221515/model_61.pth --classifier knn
+python validate_cls.py --model_type bert --pretrain checkpoint/20240526000959/model_37.pth --classifier mlp
 
 python train.py --model_type pretrained_bert --batch_size 16384 --sample_node_prob 1 --n_epochs 10
-python validate.py --model_type pretrained_bert --pretrain checkpoint/20240527101905/model_35.pth --classifier mlp
+python validate_cls.py --model_type pretrained_bert --pretrain checkpoint/20240527101905/model_35.pth --classifier mlp
 
 export no_proxy="localhost,127.0.0.1"
 PYTHONPATH=. python app/rs_gradio.py --model_type scibert
+
+python validate_lp.py --model_type pretrained_bert --pretrain checkpoint/20240527101905/model_35.pth
+python validate_lp.py --model_type embedding --pretrain checkpoint/20240523004708/model_49.pth

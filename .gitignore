@@ -6,3 +6,5 @@ reference
 *.pth
 checkpoint
 .key
+flagged
+*.log

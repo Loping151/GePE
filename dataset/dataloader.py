@@ -60,6 +60,38 @@ def get_neighbour_loader(batch_size=4096, num_workers=12, device='cuda:0'):
     return train_loader, test_loader
 
 
+def get_test_edges(data=arxiv_dataset(), year=[2020]):
+    test_ids = []
+    test_labels = []
+    for y in year:
+        test_ids+=(np.where(data['graph'].node_year == y)[0]).tolist()
+    
+    row, col = np.array(data['graph'].edge_index)
+    adj_list = {}
+    adj_list_inv = {}
+    for src, dst in zip(row, col):
+        if src not in adj_list:
+            adj_list[src] = []
+        adj_list[src].append(dst)
+        if dst not in adj_list_inv:
+            adj_list_inv[dst] = []
+        adj_list_inv[dst].append(src)
+            
+    test_edges = []
+    for idx in test_ids:
+        for dst in adj_list.get(idx, []):
+            test_edges.append((idx, dst))
+            test_labels.append(1)
+        while True:
+            rdm = np.random.randint(0, data['graph'].num_nodes)
+            if rdm not in adj_list_inv.get(idx, []) and rdm != idx:
+                test_edges.append((idx, rdm))
+                test_labels.append(0)
+                break
+    
+    return test_edges, test_labels
+
+
 class ClassifierDataset(TensorDataset):
     def __init__(self, x, y):
         self.x = x

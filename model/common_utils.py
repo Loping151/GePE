@@ -3,6 +3,9 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
+
 
 
 class Node2Vec(nn.Module):
@@ -47,6 +50,11 @@ class Classifier(nn.Module):
 def evaluate(pred, label):
     input_dict = {"y_true": label, "y_pred": pred}
     return Evaluator(name='ogbn-arxiv').eval(input_dict)
+
+
+def calc_auc_score(predictions, truth):
+    fpr, tpr, _ = roc_curve(truth, predictions)
+    return auc(fpr, tpr)
 
 
 class NegativeSamplingLoss(nn.Module):

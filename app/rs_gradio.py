@@ -31,14 +31,19 @@ knn = NearestNeighbors(n_neighbors=args.k, metric='cosine')
 knn.fit(emb.numpy())
 
 # Define the function for recommendation
-def recommend_paper(title):
-    try:
-        abstract = title_to_abs(title)
-    except Exception as e:
-        return str(e), []
+def recommend_paper(title_or_abs, title, abstract):
+    if not title_or_abs: # 0 for title, 1 for abstract
+        try:
+            title, abstract = title_to_abs(title)
+            with open('gradio.log', 'a') as f:
+                f.write(f"Title: {title}, Abstract: {abstract}\n")
+        except Exception as e:
+            return str(e), []
 
-    if not abstract:
-        return "Abstract not found for the given title.", []
+        if not abstract:
+            return "Abstract not found for the given title.", []
+    else:
+        title = ''
 
     inf_emb = model.inference(abstract).cpu()
     inf_emb = F.normalize(inf_emb, p=2, dim=1)
@@ -51,25 +56,38 @@ def recommend_paper(title):
             'Title': titleabs['title'][idx],
             'Abstract': titleabs['abs'][idx],
             'Distance': str(distances[0][i])
-        }.values())
+        })
+    with open('gradio.log', 'a') as f:
+        f.write(f"Title: {title}, Recommendations: {recommendations}\n")
+        
 
-    return "Success", recommendations
+    return title, abstract, [r.values() for r in recommendations]
+
+
+def recommend_paper_title(title):
+    return recommend_paper(0, title, None)
+
+def recommend_paper_abstract(abstract):
+    return recommend_paper(1, None, abstract)
 
 if __name__ == "__main__":
     # Define the Gradio interface
-    title_input = gr.Textbox(lines=1, placeholder="Enter the article title")
-    output_text = gr.Textbox()
-    output_recommendations = gr.Dataframe(headers=["Title", "Abstract", "Distance"])
 
-    demo = gr.Interface(
-        fn=recommend_paper, 
-        inputs=title_input, 
-        outputs=[
-            gr.Row([output_text]),
-            gr.Row([output_recommendations])
-        ], 
-        title="Research Paper Recommendation System", 
-        description="Enter the title of a research paper to get recommendations based on its abstract."
-    )
+    with gr.Blocks() as demo:
+        gr.Markdown("# Research Paper Recommendation System")
+        gr.Markdown("Enter the title or abstract of a research paper to get recommendations.")
+
+        with gr.Row():
+            title_input = gr.Textbox(lines=1, placeholder="Enter the article title. Example: Attention is can can need.", label="Title", interactive=True)
+            abstract_input = gr.Textbox(lines=3, placeholder="Write your own abstract to recommend based on it. Example: This paper proposes a new method for ...", label="Abstract", interactive=True)
+        
+        with gr.Row():
+            title_box = gr.Textbox(label="Title")
+        
+        with gr.Row():
+            output_recommendations = gr.Dataframe(headers=["Title", "Abstract", "Distance"], wrap=True, height=1200)
+            
+        title_input.submit(recommend_paper_title, inputs=[title_input], outputs=[title_box, abstract_input, output_recommendations])
+        abstract_input.submit(recommend_paper_abstract, inputs=[abstract_input], outputs=[title_box, abstract_input, output_recommendations])
 
     demo.launch(share=True)

@@ -1,5 +1,4 @@
 import random
-from torch_geometric.utils import degree
 import torch
 import torch.sparse
 import numpy as np

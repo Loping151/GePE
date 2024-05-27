@@ -30,7 +30,15 @@ cd ..
 
 # run code, only baseline2 is finished now:
 python train.py # --help or see args.py for args
-python validate.py # also in args.py 
+python validate_cls.py --model_type pretrained_bert --pretrain your_model.pth # classifiation validation. also in args.py 
+python validate_lp.py --model_type pretrained_bert --pretrain your_model.pth # link prediction. also in args.py
+
+
+# start recommendation application
+PYTHONPATH=. python app/rs.py --model_type scibert # the default pretrained model path is set in args.py
+
+export no_proxy="localhost,127.0.0.1" # you'd probably used a proxy to access huggingface in China. If so, add this.
+PYTHONPATH=. python app/rs_gradio.py --model_type scibert
 ```
 
 ### Experiments
@@ -75,6 +83,7 @@ not finished. ask me.
   |- embeddings_cls.pth
   |- embeddings_mean.pth
   |- pre_tokenize.pth
+  |- other similar stuff
 - *.py
 - readme.md
 ```
