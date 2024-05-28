@@ -31,4 +31,9 @@ export no_proxy="localhost,127.0.0.1"
 PYTHONPATH=. python app/rs_gradio.py --model_type scibert
 
 python validate_lp.py --model_type pretrained_bert --pretrain checkpoint/20240527101905/model_35.pth
-python validate_lp.py --model_type embedding --pretrain checkpoint/20240523004708/model_49.pth
+python validate_lp.py --model_type embedding --pretrain checkpoint/embedding/model_49.pth
+python validate_lp.py --model_type bert --pretrain checkpoint/bert/model_37.pth
+python validate_lp.py --model_type mlp --pretrain checkpoint/mlp/model_57.pth
+
+python train.py --model_type embedding --batch_size 16384 --sample_node_prob 1 --n_epochs 10 --lr 0.001
+python train.py --model_type pretrained_bert --batch_size 25000 --sample_node_prob 1 --n_epochs 100

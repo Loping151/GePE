@@ -75,12 +75,15 @@ if __name__ == "__main__":
 
     with gr.Blocks() as demo:
         gr.Markdown("# Research Paper Recommendation System")
-        gr.Markdown("Enter the title or abstract of a research paper to get recommendations.")
+        gr.Markdown("Enter either the title or abstract of a research paper to get recommendations.")
 
         with gr.Row():
-            title_input = gr.Textbox(lines=1, placeholder="Enter the article title. Example: Attention is can can need.", label="Title", interactive=True)
-            abstract_input = gr.Textbox(lines=3, placeholder="Write your own abstract to recommend based on it. Example: This paper proposes a new method for ...", label="Abstract", interactive=True)
-        
+            with gr.Column():
+                title_input = gr.Textbox(lines=1, placeholder="Enter the article title. Example: Attention is can can need.", label="Title", interactive=True)
+                recommend_button_title = gr.Button("Submit")
+            with gr.Column():
+                abstract_input = gr.Textbox(lines=3, placeholder="Write your own abstract to recommend based on it. Example: This paper proposes a new method for ...", label="Abstract", interactive=True)
+                recommend_button_abstract = gr.Button("Submit")
         with gr.Row():
             title_box = gr.Textbox(label="Title")
         
@@ -89,5 +92,8 @@ if __name__ == "__main__":
             
         title_input.submit(recommend_paper_title, inputs=[title_input], outputs=[title_box, abstract_input, output_recommendations])
         abstract_input.submit(recommend_paper_abstract, inputs=[abstract_input], outputs=[title_box, abstract_input, output_recommendations])
+    
+        recommend_button_title.click(recommend_paper_title, inputs=[title_input], outputs=[title_box, output_recommendations])
+        recommend_button_abstract.click(recommend_paper_abstract, inputs=[abstract_input], outputs=[title_box, output_recommendations])
 
     demo.launch(share=True)

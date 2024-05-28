@@ -56,23 +56,7 @@ PYTHONPATH=. python app/rs_gradio.py --model_type scibert
 6. use a base embedding for word2vec, reach 0.598
 
 ### Key info to confirm
-- The ogbn-arxiv dataset is a directed graph, each directed edge indicates that one paper cites another one.
-
-Each paper comes with a 128-dimensional feature vector obtained by averaging the embeddings of the words obtained by running the skip-gram model over the MAG corpus.
-
-- MAG is dead now.
-
-- The task is to predict the 40 subject areas of arXiv CS papers, e.g., cs.AI, cs.LG, and cs.OS.
-
-- Split: train: until 2017, validate: in 2018, and test: since 2019. For us, it doesn't matter since full label is given.
-
 - Benchmark: https://paperswithcode.com/sota/node-property-prediction-on-ogbn-arxiv
-
-### how to read the code
-
-**If a function starts with '_', you don't need to pay much attention to it.**
-
-not finished. ask me.
 
 ### file organize
 
