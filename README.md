@@ -1,5 +1,5 @@
 <h1 align="center">
-GePE: Generalizable Paper Embedding for Graph Data Mining with Language-Driven Biased Random Walk
+GePE: Generalizable Paper Embedding with Language-Driven Biased Random Walk
 </h1>
 <p align="center">
     Project of AI3602 Data Mining, 2024 Spring, SJTU
@@ -47,7 +47,7 @@ Latest version is recommended for all the packages, but make sure that your CUDA
 
 ## ⚓ Preparation
 
-Before training, you should prepare the necessary dataset and embedding. In this project, we use (ogbn-arxiv)[https://ogb.stanford.edu/docs/nodeprop/#ogbn-arxiv] dataset for experiments. Although the graph can be downloaded automatically, you have to download the raw texts of titles and abstracts manually by running the following commands:
+Before training, you should prepare the necessary dataset and embedding. In this project, we use [ogbn-arxiv](https://ogb.stanford.edu/docs/nodeprop/#ogbn-arxiv) dataset for experiments. Although the graph can be downloaded automatically, you have to download the raw texts of titles and abstracts manually by running the following commands:
 
 ```bash
 mkdir data && cd data
