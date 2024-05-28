@@ -96,4 +96,4 @@ if __name__ == "__main__":
         recommend_button_title.click(recommend_paper_title, inputs=[title_input], outputs=[title_box, output_recommendations])
         recommend_button_abstract.click(recommend_paper_abstract, inputs=[abstract_input], outputs=[title_box, output_recommendations])
 
-    demo.launch(share=True)
+    demo.launch(share=True, server_port=7998)
