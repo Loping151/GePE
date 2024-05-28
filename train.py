@@ -81,7 +81,7 @@ class BertNode2VecTrainer:
 
 
     def _get_random_walks_parallel(self):
-        total_nodes = self.walker.num_nodes
+        total_nodes = self.num_nodes
         batch_size = total_nodes // self.num_workers + 1
         params = [(start, min(start + batch_size, total_nodes)) for start in range(0, total_nodes, batch_size)]
         args = [self.walk_length, self.window_size // 2, self.n_walks_per_node, self.walker]
