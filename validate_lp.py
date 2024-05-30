@@ -61,8 +61,7 @@ if __name__ == "__main__":
     predictions = []
     for edge, label in tqdm(zip(test_edge, test_label)):
         src, dst = edge
-        pred = torch.matmul(emb[src].unsqueeze(0), emb[dst].unsqueeze(0).t()).item()
-        pred = torch.nn.Sigmoid(pred)
+        pred = torch.nn.Sigmoid()(torch.matmul(emb[src].unsqueeze(0), emb[dst].unsqueeze(0).t())).item()
         predictions.append(pred)
     
     result = calc_auc_score(predictions, test_label)

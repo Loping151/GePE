@@ -8,3 +8,4 @@ checkpoint
 .key
 flagged
 *.log
+*.npy

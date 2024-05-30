@@ -7,6 +7,10 @@ from model.bert import BertNode2Vec
 from model.scibert import SciBertNode2Vec
 from utils.args import get_app_args
 from app.get_abstract import title_to_abs
+import pandas as pd
+import numpy as np
+
+
 
 # Initialize arguments and model
 args = get_app_args()
@@ -14,6 +18,13 @@ device = args.device
 data = arxiv_dataset()
 titleabs = load_titleabs()
 
+ref_count = np.zeros(data['graph'].num_nodes)
+edges = data['graph'].edge_index
+srcs, dsts = np.array(edges)
+for src, dst in zip(srcs, dsts):
+    ref_count[dst] += 1
+    
+np.max(ref_count), np.min(ref_count), np.mean(ref_count), np.median(ref_count)
 # Load pre-trained embeddings
 with torch.no_grad():
     if args.model_type == 'bert':
@@ -50,18 +61,27 @@ def recommend_paper(title_or_abs, title, abstract):
     
     distances, nearest_indices = knn.kneighbors(inf_emb.numpy(), return_distance=True)
 
+    sorted_indices_and_distances = sorted(
+        zip(nearest_indices[0], distances[0]), 
+        key=lambda x: ref_count[x[0]], 
+        reverse=True
+    )
+    
+    nearest_indices = [t[0] for t in sorted_indices_and_distances[:args.k]]
+    distances = [t[1] for t in sorted_indices_and_distances[:args.k]]
+    
     recommendations = []
-    for i, idx in enumerate(nearest_indices[0]):
+    for i, idx in enumerate(nearest_indices):
         recommendations.append({
             'Title': titleabs['title'][idx],
             'Abstract': titleabs['abs'][idx],
-            'Distance': str(distances[0][i])
+            'Distance': str(distances[i])
         })
     with open('gradio.log', 'a') as f:
         f.write(f"Title: {title}, Recommendations: {recommendations}\n")
         
 
-    return title, abstract, [r.values() for r in recommendations]
+    return title, abstract, pd.DataFrame(recommendations)
 
 
 def recommend_paper_title(title):

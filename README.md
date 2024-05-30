@@ -1,6 +1,5 @@
 <h1 align="center">
-GePE: Generalizable Paper Embedding for Graph Data Mining with Language-Driven Biased Random Walk
-</h1>
+GePE: Generalizable Paper Embedding with Language-Driven Biased Random Walk</h1>
 <p align="center">
     Project of AI3602 Data Mining, 2024 Spring, SJTU
     <br />

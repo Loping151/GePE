@@ -63,7 +63,9 @@ if __name__ == "__main__":
             model.load(args.pretrain, device)
             emb = model.embed_all(data)
     
-    emb = F.normalize(emb, p=2, dim=1)
+    emb = F.normalize(emb, p=2, dim=1).detach()
+    # emb_np = emb.cpu().numpy()
+    # np.save('emb.npy', emb_np)
     emb_train = emb[np.concatenate([data['train_idx'], data['valid_idx']])]
     emb_test = emb[data['test_idx']]
     

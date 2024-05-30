@@ -23,6 +23,7 @@ class Node2Vec(nn.Module):
         print(f"Model loaded from {path}")
         return self
 
+    @torch.no_grad()
     def embed_all(self, data):
         emb_list = []
         for ids in tqdm(range(0, data['graph'].num_nodes)):
@@ -32,17 +33,20 @@ class Node2Vec(nn.Module):
         return emb
 
 class Classifier(nn.Module):
-    def __init__(self, in_dim, num_cls, hidden_dim=1024):
+    def __init__(self, in_dim, num_cls, hidden_dim=256):
         super(Classifier, self).__init__()
         self.fc1 = nn.Linear(in_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, num_cls)
+        # self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+        self.fc3 = nn.Linear(hidden_dim, num_cls)
         # self.softmax = nn.Softmax(dim=1)
         # self.sigmoid = nn.Sigmoid()
         
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x)
-        x = self.fc2(x)
+        # x = self.fc2(x)
+        # x = F.relu(x)
+        x = self.fc3(x)
         # x = self.sigmoid(x)
         return x
 
