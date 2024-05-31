@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
+
+
 class SciBertNode2Vec(Node2Vec):
     
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_scibert.pth', pre_embedding='./data/pre_embedding_scibert.pth', device='cuda:0'):
@@ -30,7 +32,6 @@ class SciBertNode2Vec(Node2Vec):
             nn.ReLU(),
             nn.Linear(4096, 768)
         ).to(device)
-        
         
     def get_ids_by_idx(self, idx):
         idx_ids = {k:v[idx] for k, v in self.abs_ids.items()}

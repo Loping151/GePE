@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch
 
 
+
 class BertNode2Vec(Node2Vec):
     
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_bert.pth', device='cuda:0'):
@@ -35,7 +36,6 @@ class BertNode2Vec(Node2Vec):
         outputs = self.bert(**inputs)
 
         return outputs.pooler_output
-
 
 
 

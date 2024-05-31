@@ -32,22 +32,17 @@ class Node2Vec(nn.Module):
         emb = torch.cat(emb_list, dim=0)
         return emb
 
+
 class Classifier(nn.Module):
     def __init__(self, in_dim, num_cls, hidden_dim=256):
         super(Classifier, self).__init__()
         self.fc1 = nn.Linear(in_dim, hidden_dim)
-        # self.fc2 = nn.Linear(hidden_dim, hidden_dim)
-        self.fc3 = nn.Linear(hidden_dim, num_cls)
-        # self.softmax = nn.Softmax(dim=1)
-        # self.sigmoid = nn.Sigmoid()
+        self.fc2 = nn.Linear(hidden_dim, num_cls)
         
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x)
-        # x = self.fc2(x)
-        # x = F.relu(x)
-        x = self.fc3(x)
-        # x = self.sigmoid(x)
+        x = self.fc2(x)
         return x
 
 
@@ -108,6 +103,8 @@ class NegativeSamplingLoss(nn.Module):
         loss = pos_loss + neg_loss
 
         return loss
+
+
 
 # Example usage
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch
 
 
+
 class DistilBertNode2Vec(Node2Vec):
     
     def __init__(self, abstract=None, pre_tokenize='./data/pre_tokenize_distilbert.pth', device='cuda:0'):

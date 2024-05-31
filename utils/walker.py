@@ -20,8 +20,6 @@ class BiasedRandomWalker:
         self.num_nodes = self.data.num_nodes
         
         self.adj_list, self.adj_list_inv = self._convert_to_adj_list()
-        # sel
-        # f.connected_nodes = list(set(self.adj_list.keys())) # count only nodes with out edges to walk from
         self.connected_nodes = list(range(self.num_nodes)) # count only nodes with out edges to walk from
         print(f"Number of connected nodes: {len(self.connected_nodes)}")
     
@@ -139,13 +137,6 @@ class BiasedRandomWalker:
                 # For the subsequent nodes, sample based on the biased probabilities
                 nexts, probs = self.get_probs_biased(curr_node, prev)
 
-            # if not nexts:
-            #     # padding. should not happen for undirected graphs
-            #     # while len(trace) < length:
-            #         # trace.append(-1)
-            #     break  # If no neighbors, end the walk
-
-            # `target` is to be sampled from neighboring nodes based on probabilities
             target = random.choices(nexts, probs)[0]
             trace.append(target)
 
@@ -153,6 +144,7 @@ class BiasedRandomWalker:
             current_len += 1
 
         return trace
+
 
 
 if __name__ == "__main__":

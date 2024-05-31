@@ -9,3 +9,6 @@ checkpoint
 flagged
 *.log
 *.npy
+note.txt
+playground.ipynb
+readme_old.md
