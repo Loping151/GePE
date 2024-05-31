@@ -3,7 +3,6 @@ GePE: Generalizable Paper Embedding with Language-Driven Biased Random Walk
 </h1>
 <p align="center">
     Project of AI3602 Data Mining, 2024 Spring, SJTU
-    <br> <strong>Team DungeonMaster</strong>    
     <br />
     <a href="https://github.com/Loping151"><strong>Kailing Wang</strong></a>
     &nbsp;
@@ -13,9 +12,9 @@ GePE: Generalizable Paper Embedding with Language-Driven Biased Random Walk
     &nbsp;
 </p>
 <p align="center">
-    <a href="https://github.com/Loping151/DungeonMaster"> <img alt="Github Repository" src="https://img.shields.io/badge/Github-Repository-blue?logo=github&logoColor=blue"> </a>
+    <a href="https://github.com/Loping151/GePE"> <img alt="Github Repository" src="https://img.shields.io/badge/Github-Repository-blue?logo=github&logoColor=blue"> </a>
     <!-- <a href="assets/slides.pdf"> <img alt="Presentation Slides" src="https://img.shields.io/badge/Presentation-Slides-green?logo=googlenews&logoColor=green"> </a> -->
-    <a href='assets/report.pdf'> <img alt='Project Report' src='https://img.shields.io/badge/Project-Report-red?style=flat&logo=googlescholar&logoColor=red'> </a>
+    <a href='assets/poster.pdf'> <img alt='Project Poster' src='https://img.shields.io/badge/Project-Poster-red?style=flat&logo=googlescholar&logoColor=red'> </a>
 </p>
 
 This project introduces the Generalizable Paper Embedding (GePE) model, which leverages both textual and structural information from academic papers to improve paper classification, citation prediction, and recommendation tasks. Using a language-driven biased random walk, GePE efficiently captures semantic relationships between papers, enhancing the embeddings' quality and applicability to unseen data. This approach helps researchers effectively navigate and analyze extensive academic literature.
@@ -96,7 +95,11 @@ python train.py --model_type pretrained_bert --batch_size 8192
 python train.py --model_type pretrained_bert --batch_size 8192 --pretrain your_model.pth # allow resume training
 ```
 
-The batchsize set above are for GPUs with 24GB memory. You can adjust the batchsize according to your GPU memory.
+The batch size set above is for GPUs with 24GB memory. You can adjust the batch size according to your GPU memory.
+
+Here is a visualization of the embedding space of our method:
+
+![Embedding Space](assets/embedding.png)
 
 ## 💯 Evaluation
 
@@ -107,6 +110,17 @@ python validate_cls.py --model_type pretrained_bert --pretrain your_model.pth
 python validate_lp.py --model_type pretrained_bert --pretrain your_model.pth
 ```
 
+Here are our evaluation results for your reference:
+
+| Method           | \# Parameters   | Generalizable | NC (ACC) | LP (AUC) |
+|------------------|:---------------:|:-------------:|:--------:|:--------:|
+| Hash Mapping     | $3.7\text{M}$   | No            | $9.8\%$  | $0.558$  |
+| Vanilla Embedding| $130.0\text{M}$ | No            | $60.5\%$ | $0.934$  |
+| Language Encoding| $30.5\text{M}$  | Yes           | $26.9\%$ | $0.733$  |
+| GePE (ours)      | $23.1\text{M}$  | Yes           | $68.3\%$ | $0.859$  |
+
+Refer to the poster if you want to see more details.
+
 ## 🤖 Demo
 
 We provide a recommendation system based on the trained model. You can run the following command to start the recommendation application:
@@ -116,4 +130,8 @@ We provide a recommendation system based on the trained model. You can run the f
 PYTHONPATH=. python app/rs_cmd.py --model_type scibert # Note that the default pretrained path is model/test.pth
 # To run in gradio
 PYTHONPATH=. python app/rs_gradio.py --model_type scibert
-``` 
+```
+
+Here is a sample result of the recommendation system:
+
+![Recommendation System](assets/recommendation.png)
